@@ -200,7 +200,28 @@ The `advanced_sql/` directory demonstrates 30 SQL techniques:
 | Target | Status | Profile |
 |--------|--------|---------|
 | DuckDB | Full build passes (1918/1918) | `--target duckdb` (default) |
+| DuckDB (Recce base) | Same file, `base` schema | `--target duckdb-base` |
+| DuckDB (Recce current) | Same file, `current` schema | `--target duckdb-current` |
 | Snowflake | SQL compatible, needs credentials | `--target snowflake` |
+
+## Recce Setup
+
+[Recce](https://github.com/DataRecce/recce) compares two dbt environments to catch data impact during PR review. This project includes two DuckDB targets (`duckdb-base` and `duckdb-current`) that share the same database file but use separate schemas.
+
+```bash
+# 1. Build the base environment (e.g., from the main branch)
+uv run --with dbt-duckdb dbt seed --profiles-dir . --target duckdb-base --vars 'load_source_data: true'
+uv run --with dbt-duckdb dbt build --full-refresh --profiles-dir . --target duckdb-base --vars 'load_source_data: true'
+
+# 2. Switch to your feature branch, then build the current environment
+uv run --with dbt-duckdb dbt seed --profiles-dir . --target duckdb-current --vars 'load_source_data: true'
+uv run --with dbt-duckdb dbt build --full-refresh --profiles-dir . --target duckdb-current --vars 'load_source_data: true'
+
+# 3. Start Recce server
+uv run --with recce recce server --target-base-path target-base
+```
+
+Pre-built base artifacts (`manifest.json`, `catalog.json`) are included in `target-base/` so you can skip step 1 if you just want to explore.
 
 ## Intentional SQL Mistakes
 
