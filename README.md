@@ -210,12 +210,14 @@ The `advanced_sql/` directory demonstrates 30 SQL techniques:
 
 ```bash
 # 1. Build the base environment (e.g., from the main branch)
-uv run --with dbt-duckdb dbt seed --profiles-dir . --target duckdb-base --vars 'load_source_data: true'
-uv run --with dbt-duckdb dbt build --full-refresh --profiles-dir . --target duckdb-base --vars 'load_source_data: true'
+uv run --with dbt-duckdb dbt seed --profiles-dir . --target duckdb-base --target-path target-base --vars 'load_source_data: true'
+uv run --with dbt-duckdb dbt build --full-refresh --profiles-dir . --target duckdb-base --target-path target-base --vars 'load_source_data: true'
+uv run --with dbt-duckdb dbt docs generate --profiles-dir . --target duckdb-base --target-path target-base
 
 # 2. Switch to your feature branch, then build the current environment
 uv run --with dbt-duckdb dbt seed --profiles-dir . --target duckdb-current --vars 'load_source_data: true'
 uv run --with dbt-duckdb dbt build --full-refresh --profiles-dir . --target duckdb-current --vars 'load_source_data: true'
+uv run --with dbt-duckdb dbt docs generate --profiles-dir . --target duckdb-current
 
 # 3. Start Recce server
 uv run --with recce recce server --target-base-path target-base
