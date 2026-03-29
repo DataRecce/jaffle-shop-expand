@@ -7,6 +7,18 @@ default:
       schema: public
       threads: 4
 
+    duckdb-base:
+      type: duckdb
+      path: "jaffle_shop.duckdb"
+      schema: base
+      threads: 4
+
+    duckdb-current:
+      type: duckdb
+      path: "jaffle_shop.duckdb"
+      schema: current
+      threads: 4
+
     snowflake:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT', 'dummy_account') }}"
