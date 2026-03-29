@@ -8,6 +8,10 @@ dbt_packages/
 logs/
 profiles.yml
 
+*.duckdb
+*.duckdb.wal
+target-base/
+
 .DS_Store
 
 .user.yml

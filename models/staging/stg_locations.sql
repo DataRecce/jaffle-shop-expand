@@ -11,7 +11,7 @@ renamed as (
     select
 
         ----------  ids
-        id as location_id,
+        cast(id as varchar) as location_id,
 
         ---------- text
         name as location_name,

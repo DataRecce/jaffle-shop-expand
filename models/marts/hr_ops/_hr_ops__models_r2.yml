@@ -1,0 +1,276 @@
+models:
+  - name: rpt_employee_productivity_ranking
+    config:
+      tags: ['type:report']
+    description: >
+      Employees ranked by productivity (orders handled per hour), with
+      department ranks and performance tier classification.
+    columns:
+      - name: employee_id
+        description: The unique key for each employee.
+        data_tests:
+          - not_null
+          - unique
+      - name: full_name
+        description: Employee's full name.
+      - name: department_name
+        description: Department the employee belongs to.
+      - name: avg_orders_per_hour
+        description: Average orders handled per labor hour.
+      - name: overall_productivity_rank
+        description: Rank across all employees by productivity.
+      - name: performance_tier
+        description: Performance tier (high_performer, average_performer, needs_improvement).
+
+  - name: rpt_absenteeism_dashboard
+    config:
+      tags: ['type:report']
+    description: >
+      Absenteeism rates aggregated by store and department, showing total
+      absences, average rates, and high-absenteeism employee counts.
+    columns:
+      - name: dimension
+        description: Grouping dimension (store or department).
+        data_tests:
+          - not_null
+      - name: dimension_value
+        description: Name of the store or department.
+      - name: avg_absenteeism_rate_pct
+        description: Average absenteeism rate as a percentage.
+
+  - name: rpt_payroll_budget_analysis
+    config:
+      tags: ['type:report']
+    description: >
+      Monthly payroll cost analysis by department with rolling 3-month
+      averages, overtime percentages, and month-over-month trends.
+    columns:
+      - name: department_id
+        description: Department identifier.
+        data_tests:
+          - not_null
+      - name: pay_month
+        description: Month of the payroll period.
+      - name: total_gross_pay
+        description: Total gross pay for the month in USD.
+      - name: overtime_pct_of_total
+        description: Overtime hours as a percentage of total hours.
+
+  - name: rpt_shift_coverage_gaps
+    config:
+      tags: ['type:report']
+    description: >
+      Chronic understaffing analysis by store and day-of-week, comparing
+      scheduled coverage against predicted labor demand.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+        data_tests:
+          - not_null
+      - name: day_of_week
+        description: Day of week (0=Sunday through 6=Saturday).
+      - name: avg_coverage_pct
+        description: Average coverage percentage vs predicted demand.
+      - name: is_chronic_gap
+        description: Whether this store/day combination is chronically understaffed.
+
+  - name: rpt_equipment_replacement_plan
+    config:
+      tags: ['type:report']
+    description: >
+      Equipment approaching end-of-life or with high maintenance costs,
+      prioritized for replacement with cost-of-ownership analysis.
+    columns:
+      - name: equipment_id
+        description: The unique key for each piece of equipment.
+        data_tests:
+          - not_null
+          - unique
+      - name: equipment_name
+        description: Name of the equipment.
+      - name: lifecycle_status
+        description: Current lifecycle status.
+      - name: replacement_priority
+        description: Priority ranking (1=highest, 4=lowest).
+      - name: replacement_reason
+        description: Human-readable reason for replacement recommendation.
+      - name: total_cost_of_ownership
+        description: Purchase cost plus total maintenance cost in USD.
+
+  - name: rpt_labor_cost_breakdown
+    config:
+      tags: ['type:report']
+    description: >
+      Labor cost breakdown by department and pay grade per month, separating
+      regular vs overtime hours and costs.
+    columns:
+      - name: department_name
+        description: Department name.
+        data_tests:
+          - not_null
+      - name: work_month
+        description: Month of the labor period.
+      - name: total_labor_cost
+        description: Total estimated labor cost in USD.
+      - name: overtime_pct
+        description: Overtime hours as a percentage of total hours.
+
+  - name: rpt_training_roi
+    config:
+      tags: ['type:report']
+    description: >
+      Training ROI analysis correlating training compliance tiers with
+      employee performance scores, trends, and retention.
+    columns:
+      - name: compliance_tier
+        description: Training compliance tier.
+        data_tests:
+          - not_null
+          - unique
+      - name: employee_count
+        description: Number of employees in this tier.
+      - name: avg_performance_score
+        description: Average performance review score.
+      - name: improving_pct
+        description: Percentage of employees with improving performance trends.
+
+  - name: rpt_employee_satisfaction_proxy
+    config:
+      tags: ['type:report']
+    description: >
+      Composite satisfaction proxy score combining tenure, overtime burden,
+      and performance trend into a 0-100 score with tier classification.
+    columns:
+      - name: employee_id
+        description: The unique key for each employee.
+        data_tests:
+          - not_null
+          - unique
+      - name: full_name
+        description: Employee's full name.
+      - name: composite_satisfaction_score
+        description: Weighted average of tenure, overtime, and performance scores (0-100).
+      - name: satisfaction_tier
+        description: Satisfaction tier (high, moderate, low).
+
+  - name: rpt_new_hire_ramp
+    config:
+      tags: ['type:report']
+    description: >
+      New hire time-to-productivity curve showing average orders per hour
+      across ramp phases (month 1 through 6+ months).
+    columns:
+      - name: ramp_phase
+        description: Ramp phase bucket (month_1 through after_6_months).
+        data_tests:
+          - not_null
+          - unique
+      - name: employee_count
+        description: Number of employees with data in this phase.
+      - name: avg_orders_per_hour
+        description: Average orders handled per hour in this phase.
+      - name: phase_over_phase_improvement_pct
+        description: Percentage improvement from the previous phase.
+
+  - name: rpt_seasonal_staffing_needs
+    config:
+      tags: ['type:report']
+    description: >
+      Monthly staffing recommendations based on seasonal demand patterns,
+      with demand index and classification per store.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+        data_tests:
+          - not_null
+      - name: month_number
+        description: Month number (1-12).
+      - name: demand_index
+        description: Demand index relative to annual average (100 = average).
+      - name: demand_classification
+        description: Demand classification (high_demand, normal_demand, low_demand).
+      - name: recommended_staff_count
+        description: Recommended staff count based on seasonal pattern.
+
+  - name: rpt_department_headcount
+    config:
+      tags: ['type:report']
+    description: >
+      Current headcount by department with new hire percentage, attrition
+      rate, and average tenure of active employees.
+    columns:
+      - name: department_name
+        description: Department name.
+        data_tests:
+          - not_null
+          - unique
+      - name: active_employees
+        description: Number of currently active employees.
+      - name: new_hires
+        description: Number of active employees with less than 6 months tenure.
+      - name: attrition_rate_pct
+        description: Percentage of total employees who are inactive.
+
+  - name: rpt_maintenance_cost_trend
+    config:
+      tags: ['type:report']
+    description: >
+      Monthly maintenance cost trend by equipment type and store, with
+      month-over-month change and rolling 3-month averages.
+    columns:
+      - name: equipment_type
+        description: Type of equipment.
+        data_tests:
+          - not_null
+      - name: maintenance_month
+        description: Month of the maintenance events.
+      - name: total_cost
+        description: Total maintenance cost in USD.
+      - name: cost_change_pct
+        description: Month-over-month cost change percentage.
+      - name: rolling_3mo_avg_cost
+        description: Rolling 3-month average maintenance cost.
+
+  - name: rpt_shift_utilization
+    config:
+      tags: ['type:report']
+    description: >
+      Actual hours worked vs scheduled hours by store per month, with
+      utilization percentage, no-show rates, and late arrival rates.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+        data_tests:
+          - not_null
+      - name: report_month
+        description: Month of the report.
+      - name: total_scheduled_hours
+        description: Total scheduled shift hours.
+      - name: timecard_hours_worked
+        description: Total hours recorded on timecards.
+      - name: utilization_pct
+        description: Timecard hours as a percentage of scheduled hours.
+      - name: no_show_rate_pct
+        description: No-show rate as a percentage of total shifts.
+
+  - name: rpt_workforce_diversity_metrics
+    config:
+      tags: ['type:report']
+    description: >
+      Headcount distribution by department, position title, and pay grade,
+      showing each group's share of department and organization totals.
+    columns:
+      - name: department_name
+        description: Department name.
+        data_tests:
+          - not_null
+      - name: position_title
+        description: Position title.
+      - name: pay_grade
+        description: Pay grade classification.
+      - name: total_employees
+        description: Total employees in this group.
+      - name: pct_of_department
+        description: This group's share of the department headcount.
+      - name: pct_of_organization
+        description: This group's share of the total organization headcount.

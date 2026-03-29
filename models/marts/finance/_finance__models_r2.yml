@@ -1,0 +1,380 @@
+models:
+  - name: rpt_revenue_trend_weekly
+    config:
+      tags: ['type:report', 'cadence:weekly']
+    description: Weekly revenue with week-over-week growth rate and rolling 4-week average by store.
+    columns:
+      - name: revenue_week
+        description: Start of the revenue week.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: location_name
+        description: Name of the store.
+      - name: total_revenue
+        description: Total revenue for the week in USD.
+      - name: invoice_count
+        description: Number of invoices for the week.
+      - name: wow_growth_rate
+        description: Week-over-week revenue growth rate.
+      - name: rolling_4w_avg_revenue
+        description: Rolling 4-week average revenue in USD.
+
+  - name: rpt_store_profitability
+    config:
+      tags: ['type:report']
+    description: Revenue minus expenses per store per month with gross and net margins.
+    columns:
+      - name: location_id
+        description: Foreign key to the store location.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: Name of the store.
+      - name: report_month
+        description: Reporting month.
+        data_tests:
+          - not_null
+      - name: gross_revenue
+        description: Gross revenue before tax in USD.
+      - name: total_expenses
+        description: Total expenses for the month in USD.
+      - name: gross_profit
+        description: Revenue minus COGS in USD.
+      - name: net_income
+        description: Revenue minus all expenses in USD.
+      - name: gross_margin_pct
+        description: Gross profit as a percentage of revenue.
+      - name: net_margin_pct
+        description: Net income as a percentage of revenue.
+
+  - name: rpt_payment_method_trend_monthly
+    config:
+      tags: ['type:report', 'cadence:monthly']
+    description: Monthly breakdown of payment methods with share percentages and month-over-month growth.
+    columns:
+      - name: report_month
+        description: Reporting month.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: payment_method
+        description: Payment method used.
+        data_tests:
+          - not_null
+      - name: order_count
+        description: Number of orders using this method.
+      - name: method_total
+        description: Total amount for this payment method in USD.
+      - name: revenue_share_pct
+        description: This method's share of total location monthly revenue.
+      - name: mom_growth_rate
+        description: Month-over-month growth rate for this payment method.
+
+  - name: rpt_refund_reason_breakdown
+    config:
+      tags: ['type:report']
+    description: Refund count and amount by reason code with share percentages per store per month.
+    columns:
+      - name: refund_reason
+        description: Reason for the refund.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: report_month
+        description: Reporting month.
+      - name: refund_count
+        description: Number of refunds for this reason.
+      - name: total_refund_amount
+        description: Total refund amount for this reason in USD.
+      - name: avg_refund_amount
+        description: Average refund amount in USD.
+      - name: approved_count
+        description: Number of approved refunds.
+      - name: reason_share_pct
+        description: This reason's share of total refunds by count.
+      - name: reason_amount_share_pct
+        description: This reason's share of total refunds by amount.
+
+  - name: rpt_gift_card_velocity
+    config:
+      tags: ['type:report']
+    description: Gift card issuance vs redemption trends with activation rate and net liability changes.
+    columns:
+      - name: report_month
+        description: Reporting month.
+        data_tests:
+          - not_null
+      - name: cards_issued
+        description: Number of gift cards issued.
+      - name: total_issued_value
+        description: Total value of issued gift cards in USD.
+      - name: cards_first_used
+        description: Number of cards first used in this month.
+      - name: total_redeemed_amount
+        description: Total amount redeemed in USD.
+      - name: avg_days_between_uses
+        description: Average days between consecutive uses for cards first used this month.
+      - name: net_liability_change
+        description: Issued value minus redeemed value — net change in gift card liability in USD.
+      - name: activation_rate
+        description: Ratio of cards first used to cards issued.
+
+  - name: rpt_expense_category_ranking
+    config:
+      tags: ['type:report']
+    description: Expense categories ranked by total spend per store per month with share percentages.
+    columns:
+      - name: location_id
+        description: Foreign key to the store location.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: Name of the store.
+      - name: expense_category_id
+        description: Foreign key to the expense category.
+      - name: category_name
+        description: Name of the expense category.
+      - name: expense_month
+        description: Month the expenses were incurred.
+        data_tests:
+          - not_null
+      - name: total_spend
+        description: Total spend for this category at this store in USD.
+      - name: spend_share_pct
+        description: This category's share of total store spend for the month.
+      - name: category_rank
+        description: Rank of this category by spend within the store and month.
+
+  - name: rpt_cost_per_order_trend
+    config:
+      tags: ['type:report']
+    description: Cost per order trend over time by store with month-over-month change and rolling averages.
+    columns:
+      - name: location_id
+        description: Foreign key to the store location.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: Name of the store.
+      - name: report_month
+        description: Reporting month.
+        data_tests:
+          - not_null
+      - name: total_cost_per_order
+        description: Total cost per order in USD.
+      - name: cogs_per_order
+        description: COGS per order in USD.
+      - name: opex_per_order
+        description: Operating expenses per order in USD.
+      - name: expense_to_revenue_ratio
+        description: Total expenses as a ratio of revenue.
+      - name: cost_per_order_mom_change_pct
+        description: Month-over-month percentage change in cost per order.
+      - name: rolling_3m_avg_cost_per_order
+        description: Rolling 3-month average cost per order in USD.
+
+  - name: rpt_revenue_concentration
+    config:
+      tags: ['type:report']
+    description: Revenue concentration analysis — customer ranking by revenue with cumulative share and decile tiers.
+    columns:
+      - name: customer_id
+        description: Foreign key to the customer.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_name
+        description: Full name of the customer.
+      - name: total_revenue
+        description: Total revenue from this customer in USD.
+      - name: invoice_count
+        description: Number of paid invoices.
+      - name: revenue_share_pct
+        description: This customer's share of total revenue.
+      - name: revenue_rank
+        description: Customer rank by revenue (1 = highest).
+      - name: revenue_decile
+        description: Revenue decile (1 = top 10%).
+      - name: cumulative_revenue_pct
+        description: Cumulative percentage of revenue up to and including this customer.
+      - name: concentration_tier
+        description: Revenue tier (top_10_pct, top_20_pct, top_50_pct, bottom_50_pct).
+
+  - name: rpt_daily_cash_flow
+    config:
+      tags: ['type:report', 'cadence:daily']
+    description: Daily inflows (revenue) minus outflows (expenses, refunds) per store with cumulative and rolling averages.
+    columns:
+      - name: cash_flow_date
+        description: The date of the cash flow.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: Foreign key to the store location.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: Name of the store.
+      - name: daily_inflow
+        description: Total revenue inflow for the day in USD.
+      - name: daily_refund_outflow
+        description: Total approved refund outflow for the day in USD.
+      - name: daily_expense_outflow
+        description: Total expense outflow for the day in USD.
+      - name: net_cash_flow
+        description: Inflows minus all outflows in USD.
+      - name: cumulative_net_cash_flow
+        description: Running total of net cash flow for this store in USD.
+      - name: rolling_7d_avg_net_cash_flow
+        description: Rolling 7-day average net cash flow in USD.
+
+  - name: rpt_ar_collection_rate
+    config:
+      tags: ['type:report']
+    description: AR collection rate over time — how quickly receivables are collected, with rolling trends.
+    columns:
+      - name: report_month
+        description: Reporting month based on receivable creation date.
+        data_tests:
+          - not_null
+      - name: receivables_created
+        description: Number of receivables created in this month.
+      - name: total_amount_due
+        description: Total amount due for receivables created this month in USD.
+      - name: total_amount_collected
+        description: Total amount collected in USD.
+      - name: total_amount_outstanding
+        description: Total outstanding amount in USD.
+      - name: collection_rate
+        description: Amount collected divided by amount due.
+      - name: full_collection_rate
+        description: Proportion of receivables fully collected.
+      - name: rolling_3m_avg_collection_rate
+        description: Rolling 3-month average collection rate.
+
+  - name: rpt_seasonal_revenue_pattern
+    config:
+      tags: ['type:report']
+    description: Revenue by month-of-year across years to identify seasonal patterns with year-over-year comparisons.
+    columns:
+      - name: revenue_month
+        description: The revenue month.
+        data_tests:
+          - not_null
+      - name: revenue_year
+        description: Year of the revenue.
+      - name: month_of_year
+        description: Month number (1-12).
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: location_name
+        description: Name of the store.
+      - name: total_revenue
+        description: Total revenue for the month in USD.
+      - name: seasonal_index
+        description: Ratio of this month's revenue to the average revenue for this month-of-year.
+      - name: month_vs_overall_ratio
+        description: Average revenue for this month-of-year divided by overall average monthly revenue.
+      - name: yoy_growth_rate
+        description: Year-over-year growth rate for same month.
+
+  - name: rpt_tax_rate_impact
+    config:
+      tags: ['type:report']
+    description: Effective tax rates across jurisdictions with variance analysis and cumulative collection totals.
+    columns:
+      - name: jurisdiction
+        description: Tax jurisdiction.
+        data_tests:
+          - not_null
+      - name: tax_type
+        description: Type of tax.
+      - name: tax_rate_pct
+        description: Statutory tax rate percentage.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: tax_month
+        description: Month of tax collection.
+        data_tests:
+          - not_null
+      - name: taxable_amount
+        description: Total taxable amount in USD.
+      - name: tax_collected
+        description: Tax collected in USD.
+      - name: effective_tax_rate
+        description: Actual tax collected divided by taxable amount.
+      - name: rate_variance
+        description: Difference between effective and statutory tax rate.
+      - name: tax_burden_pct
+        description: Tax as a percentage of total revenue including tax.
+      - name: cumulative_tax_collected
+        description: Running total of tax collected for this jurisdiction.
+
+  - name: rpt_invoice_aging
+    config:
+      tags: ['type:report']
+    description: Age of unpaid invoices in buckets (current, 1-30, 31-60, 61-90, 90+ days) with summary metrics.
+    columns:
+      - name: invoice_id
+        description: The unique key for each unpaid invoice.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: Foreign key to the customer.
+      - name: customer_name
+        description: Full name of the customer.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: amount_due
+        description: Remaining amount due on this invoice in USD.
+      - name: days_overdue
+        description: Number of days past due.
+      - name: aging_bucket
+        description: Aging category (current, 1-30 days, 31-60 days, 61-90 days, 90+ days).
+      - name: aging_bucket_sort
+        description: Numeric sort order for aging buckets.
+      - name: pct_of_total_due
+        description: This invoice's share of all unpaid invoices.
+      - name: customer_unpaid_invoice_count
+        description: Total number of unpaid invoices for this customer.
+
+  - name: rpt_financial_health_scorecard
+    config:
+      tags: ['type:report']
+    description: Composite financial health score per store per month combining revenue growth, expense ratio, refund rate, and profitability.
+    columns:
+      - name: location_id
+        description: Foreign key to the store location.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: Name of the store.
+      - name: report_month
+        description: Reporting month.
+        data_tests:
+          - not_null
+      - name: total_revenue
+        description: Total revenue for the month in USD.
+      - name: revenue_growth_rate
+        description: Month-over-month revenue growth rate.
+      - name: expense_ratio
+        description: Total expenses as a ratio of revenue.
+      - name: refund_rate
+        description: Refund count divided by invoice count.
+      - name: revenue_growth_score
+        description: Score component for revenue growth (0-25).
+      - name: expense_ratio_score
+        description: Score component for expense efficiency (0-25).
+      - name: refund_rate_score
+        description: Score component for refund rate (0-25).
+      - name: profitability_score
+        description: Score component for net profitability (0-25).
+      - name: health_score
+        description: Composite financial health score (0-100).
+      - name: health_grade
+        description: Health grade (excellent, good, fair, poor).

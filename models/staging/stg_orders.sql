@@ -11,9 +11,9 @@ renamed as (
     select
 
         ----------  ids
-        id as order_id,
-        store_id as location_id,
-        customer as customer_id,
+        cast(id as varchar) as order_id,
+        cast(store_id as varchar) as location_id,
+        cast(customer as varchar) as customer_id,
 
         ---------- numerics
         subtotal as subtotal_cents,

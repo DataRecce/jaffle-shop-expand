@@ -1,0 +1,403 @@
+models:
+  - name: rpt_product_sales_by_store
+    config:
+      tags: ['type:report']
+    description: Product sales heatmap showing which products sell best at which stores. One row per product per store.
+    columns:
+      - name: location_id
+        description: Foreign key to the store location.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: Name of the store location.
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+      - name: product_name
+        description: Name of the product.
+      - name: total_units_sold
+        description: Total units sold at this store.
+      - name: total_revenue
+        description: Total revenue at this store in USD.
+      - name: volume_rank_at_store
+        description: Rank by units sold at this store.
+      - name: revenue_rank_at_store
+        description: Rank by revenue at this store.
+      - name: revenue_share_at_store
+        description: This product's share of the store's total revenue.
+
+  - name: rpt_menu_item_ranking
+    config:
+      tags: ['type:report']
+    description: Menu items ranked by revenue, volume, and margin within each category. One row per product.
+    columns:
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_name
+        description: Name of the product.
+      - name: category_name
+        description: Name of the menu category.
+      - name: total_units_sold
+        description: Total units sold across all time.
+      - name: total_revenue
+        description: Total revenue across all time in USD.
+      - name: volume_rank_in_category
+        description: Rank by units sold within the category.
+      - name: revenue_rank_in_category
+        description: Rank by revenue within the category.
+      - name: gross_margin_pct
+        description: Gross margin as a percentage of price.
+      - name: total_gross_profit
+        description: Total gross profit in USD.
+      - name: profit_rank_in_category
+        description: Rank by gross profit within the category.
+
+  - name: rpt_ingredient_cost_impact
+    config:
+      tags: ['type:report']
+    description: Impact of ingredient price changes on menu item margins. One row per menu item per month.
+    columns:
+      - name: price_month
+        description: The month of the ingredient price change.
+        data_tests:
+          - not_null
+      - name: menu_item_id
+        description: Foreign key to the menu item.
+        data_tests:
+          - not_null
+      - name: menu_item_name
+        description: Display name of the menu item.
+      - name: menu_item_price
+        description: Current menu price in USD.
+      - name: gross_margin
+        description: Current gross margin in USD.
+      - name: total_cost_impact
+        description: Total ingredient cost change impact in USD.
+      - name: ingredients_with_change
+        description: Number of ingredients with price changes.
+      - name: adjusted_margin
+        description: Margin after accounting for ingredient cost changes in USD.
+      - name: adjusted_margin_pct
+        description: Adjusted margin as a percentage of price.
+
+  - name: rpt_product_margin_trend
+    config:
+      tags: ['type:report']
+    description: Monthly margin trends by product with alerts for declining margins. One row per product per month.
+    columns:
+      - name: sale_month
+        description: The month of the sales.
+        data_tests:
+          - not_null
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+      - name: product_name
+        description: Name of the product.
+      - name: gross_margin_pct
+        description: Gross margin as a percentage of price.
+      - name: monthly_gross_profit
+        description: Total gross profit for the month in USD.
+      - name: margin_pct_change
+        description: Change in margin percentage from previous month.
+      - name: margin_trend_status
+        description: Margin trend classification (significant/moderate decline/improvement, stable).
+      - name: margin_health
+        description: Margin health classification (critical, warning, healthy).
+      - name: rolling_3m_avg_margin_pct
+        description: Rolling 3-month average margin percentage.
+
+  - name: rpt_new_product_tracker
+    config:
+      tags: ['type:report']
+    description: New product launch dashboard with 30/60/90 day performance vs benchmarks. One row per product.
+    columns:
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_name
+        description: Name of the product.
+      - name: launch_date
+        description: Estimated launch date based on first pricing record.
+      - name: days_on_market
+        description: Total days since product launch.
+      - name: units_sold_30d
+        description: Units sold in the first 30 days.
+      - name: revenue_30d
+        description: Revenue in the first 30 days in USD.
+      - name: units_sold_90d
+        description: Units sold in the first 90 days.
+      - name: revenue_90d
+        description: Revenue in the first 90 days in USD.
+      - name: pct_vs_benchmark_30d
+        description: Performance vs average product at 30 days (percentage).
+      - name: pct_vs_benchmark_90d
+        description: Performance vs average product at 90 days (percentage).
+      - name: velocity_change_30_to_60d
+        description: Change in daily sales velocity from 30-day to 60-day window (percentage).
+      - name: launch_classification
+        description: Launch performance classification (strong_launch, on_track, below_expectations, underperforming).
+
+  - name: rpt_customer_favorites
+    config:
+      tags: ['type:report']
+    description: Most popular products per customer segment. One row per customer segment and product.
+    columns:
+      - name: customer_segment
+        description: Customer type segment (new, returning).
+        data_tests:
+          - not_null
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+      - name: product_name
+        description: Name of the product.
+      - name: product_type
+        description: Type of the product.
+      - name: customer_count
+        description: Number of customers in this segment who favor this product.
+      - name: total_purchases
+        description: Total purchase count across customers in this segment.
+      - name: avg_share_of_wallet
+        description: Average share of wallet this product represents for customers.
+      - name: popularity_rank_in_segment
+        description: Rank of this product within the customer segment.
+
+  - name: rpt_product_pair_recommendations
+    config:
+      tags: ['type:report']
+    description: Frequently bought together products for upsell recommendations. One row per product pair.
+    columns:
+      - name: product_id_a
+        description: First product in the pair.
+        data_tests:
+          - not_null
+      - name: product_name_a
+        description: Name of the first product.
+      - name: product_id_b
+        description: Second product in the pair.
+        data_tests:
+          - not_null
+      - name: product_name_b
+        description: Name of the second product.
+      - name: co_occurrence_count
+        description: Number of orders containing both products.
+      - name: support_a
+        description: Proportion of product A orders that also contain product B.
+      - name: affinity_rank
+        description: Rank of this pair by co-occurrence for product A.
+      - name: recommendation_strength
+        description: Recommendation strength (strong, moderate, weak, insufficient_data).
+      - name: is_cross_category_pair
+        description: Whether the pair spans different product types.
+
+  - name: rpt_menu_engineering_matrix
+    config:
+      tags: ['type:report']
+    description: Stars/Puzzles/Plowhorses/Dogs classification based on popularity and profitability. One row per product.
+    columns:
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_name
+        description: Name of the product.
+      - name: category_name
+        description: Name of the menu category.
+      - name: total_units_sold
+        description: Total units sold across all time.
+      - name: total_revenue
+        description: Total revenue across all time in USD.
+      - name: gross_margin_pct
+        description: Gross margin as a percentage of price.
+      - name: total_gross_profit
+        description: Total gross profit in USD.
+      - name: menu_engineering_class
+        description: Menu engineering classification (star, puzzle, plowhorse, dog).
+      - name: recommended_action
+        description: Recommended action based on classification.
+
+  - name: rpt_recipe_cost_variance
+    config:
+      tags: ['type:report']
+    description: Variance between calculated recipe cost and baseline cost. One row per recipe.
+    columns:
+      - name: recipe_id
+        description: The unique key for each recipe.
+        data_tests:
+          - not_null
+          - unique
+      - name: recipe_name
+        description: Name of the recipe.
+      - name: menu_item_id
+        description: Foreign key to the menu item.
+      - name: is_active_recipe
+        description: Whether the recipe is currently in use.
+      - name: ingredient_count
+        description: Number of distinct ingredients in the recipe.
+      - name: calculated_total_cost
+        description: Current calculated total ingredient cost in USD.
+      - name: baseline_total_cost
+        description: Baseline total ingredient cost in USD.
+      - name: cost_variance
+        description: Absolute cost variance in USD.
+      - name: cost_variance_pct
+        description: Cost variance as a percentage of baseline.
+      - name: variance_status
+        description: Variance classification (high_variance, moderate_variance, within_tolerance).
+
+  - name: rpt_product_lifecycle_stage
+    config:
+      tags: ['type:report']
+    description: Products classified by lifecycle stage based on sales trend analysis. One row per product.
+    columns:
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_name
+        description: Name of the product.
+      - name: product_type
+        description: Type of the product.
+      - name: sale_month
+        description: The most recent month of sales data.
+      - name: monthly_units_sold
+        description: Units sold in the most recent month.
+      - name: monthly_revenue
+        description: Revenue in the most recent month in USD.
+      - name: peak_monthly_units
+        description: Highest monthly units sold in product history.
+      - name: pct_of_peak
+        description: Current month units as percentage of peak.
+      - name: lifecycle_stage
+        description: Lifecycle stage classification (introduction, growth, maturity, decline).
+
+  - name: rpt_review_sentiment_by_product
+    config:
+      tags: ['type:report']
+    description: Product review summary with average rating trend and volume. One row per product.
+    columns:
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_name
+        description: Name of the product.
+      - name: product_type
+        description: Type of the product.
+      - name: total_review_count
+        description: Total number of reviews.
+      - name: avg_rating
+        description: Average rating (1-5 scale).
+      - name: positive_review_pct
+        description: Percentage of reviews with rating >= 4.
+      - name: negative_review_pct
+        description: Percentage of reviews with rating <= 2.
+      - name: overall_sentiment
+        description: Overall sentiment classification (positive, neutral, negative).
+      - name: rating_trend_direction
+        description: Recent rating trend (improving, declining, stable).
+
+  - name: rpt_category_contribution_trend
+    config:
+      tags: ['type:report']
+    description: Category share of total revenue over time. One row per category per month.
+    columns:
+      - name: sale_month
+        description: The month of the sales.
+        data_tests:
+          - not_null
+      - name: menu_category_id
+        description: Foreign key to the menu category.
+        data_tests:
+          - not_null
+      - name: category_name
+        description: Name of the menu category.
+      - name: monthly_revenue
+        description: Category revenue for the month in USD.
+      - name: revenue_share_pct
+        description: Category's share of total revenue for the month.
+      - name: revenue_mom_change_pct
+        description: Month-over-month revenue change percentage.
+      - name: share_change_ppt
+        description: Change in revenue share percentage points from previous month.
+      - name: share_trend
+        description: Share trend classification (gaining_share, losing_share, stable_share).
+
+  - name: rpt_price_change_impact
+    config:
+      tags: ['type:report']
+    description: Before/after analysis of price changes on sales volume and revenue. One row per pricing change event.
+    columns:
+      - name: pricing_history_id
+        description: The unique key for each pricing change.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: Foreign key to the product.
+      - name: product_name
+        description: Name of the product.
+      - name: old_price
+        description: Previous price in USD.
+      - name: new_price
+        description: New price in USD.
+      - name: price_change_pct
+        description: Price change as a percentage.
+      - name: price_changed_date
+        description: Date the price change took effect.
+      - name: avg_daily_units_before
+        description: Average daily units in 14 days before price change.
+      - name: avg_daily_units_after
+        description: Average daily units in 14 days after price change.
+      - name: volume_change_pct
+        description: Percentage change in daily volume after price change.
+      - name: revenue_change_pct
+        description: Percentage change in daily revenue after price change.
+      - name: projected_monthly_revenue_impact
+        description: Projected 30-day revenue impact of the price change in USD.
+      - name: impact_classification
+        description: Impact classification (revenue_positive, revenue_negative, revenue_neutral).
+
+  - name: rpt_seasonal_menu_performance
+    config:
+      tags: ['type:report']
+    description: Performance comparison of seasonal vs permanent menu items during promotions. One row per product per season.
+    columns:
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+      - name: product_name
+        description: Name of the product.
+      - name: is_seasonal
+        description: Whether the item is a seasonal menu item.
+      - name: category_name
+        description: Name of the menu category.
+      - name: season_name
+        description: Name of the season.
+      - name: promo_units_sold
+        description: Units sold during the promotion period.
+      - name: promo_revenue
+        description: Revenue during the promotion period in USD.
+      - name: non_promo_units_sold
+        description: Units sold outside the promotion period.
+      - name: non_promo_revenue
+        description: Revenue outside the promotion period in USD.
+      - name: promotion_lift_pct
+        description: Percentage increase in daily sales during promotion.
+      - name: item_promotion_status
+        description: Item-promotion status (seasonal_active, seasonal_dormant, permanent_with_promotion, permanent_baseline).
+      - name: promotion_performance
+        description: Performance during promotion vs baseline (outperforms, underperforms, consistent).

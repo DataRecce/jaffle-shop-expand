@@ -11,9 +11,9 @@ renamed as (
     select
 
         ----------  ids
-        id as order_item_id,
-        order_id,
-        sku as product_id
+        cast(id as varchar) as order_item_id,
+        cast(order_id as varchar) as order_id,
+        cast(sku as varchar) as product_id
 
     from source
 

@@ -1,0 +1,318 @@
+models:
+  - name: rpt_inventory_value_summary
+    config:
+      tags: ['type:report']
+    description: Total inventory value by warehouse and product category with share-of-warehouse analysis.
+    columns:
+      - name: warehouse_id
+        description: The foreign key to the warehouse.
+      - name: warehouse_name
+        description: The name of the warehouse.
+      - name: product_id
+        description: The foreign key to the product.
+      - name: product_name
+        description: The name of the product.
+      - name: product_type
+        description: The type/category of the product.
+      - name: total_quantity
+        description: Total quantity on hand at this warehouse for this product.
+      - name: total_value
+        description: Total inventory value in USD.
+      - name: value_share_of_warehouse
+        description: This product's value as a share of the warehouse total.
+
+  - name: rpt_supplier_quality_ranking
+    config:
+      tags: ['type:report']
+    description: Suppliers ranked by quality score with tier classification.
+    columns:
+      - name: supplier_id
+        description: The unique key for each supplier.
+        data_tests:
+          - not_null
+          - unique
+      - name: supplier_name
+        description: The name of the supplier company.
+      - name: quality_score
+        description: Quality score (1 - defect_rate), where 1.0 is perfect.
+      - name: quality_rank
+        description: Rank by quality score (1 = best).
+      - name: quality_tier
+        description: Quality tier classification (excellent, good, acceptable, poor).
+      - name: defect_rate
+        description: Ratio of rejected quantity to total received quantity.
+
+  - name: rpt_procurement_efficiency
+    config:
+      tags: ['type:report']
+    description: Monthly procurement cycle time trends and efficiency metrics by supplier.
+    columns:
+      - name: supplier_id
+        description: The foreign key to the supplier.
+        data_tests:
+          - not_null
+      - name: supplier_name
+        description: The name of the supplier company.
+      - name: order_month
+        description: The month of the purchase orders.
+        data_tests:
+          - not_null
+      - name: avg_cycle_time_days
+        description: Average procurement cycle time in days for the month.
+      - name: on_time_rate
+        description: Proportion of orders completed on time or early.
+      - name: cycle_time_efficiency_ratio
+        description: Ratio of actual to expected cycle time (below 1.0 means faster than expected).
+
+  - name: rpt_ingredient_forecast_vs_actual
+    config:
+      tags: ['type:report']
+    description: Comparison of forecasted vs actual ingredient usage with stock context.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: supply_id
+        description: The foreign key to the supply/ingredient.
+        data_tests:
+          - not_null
+      - name: demand_week
+        description: The week of the demand data.
+        data_tests:
+          - not_null
+      - name: actual_units
+        description: Actual units consumed in the week.
+      - name: forecasted_units
+        description: Forecasted units based on 4-week moving average.
+      - name: forecast_variance_pct
+        description: Signed variance percentage (positive = actual exceeded forecast).
+      - name: forecast_error_pct
+        description: Absolute forecast error percentage.
+
+  - name: rpt_supplier_concentration_risk
+    config:
+      tags: ['type:report']
+    description: Supplier concentration risk assessment flagging suppliers with high spend share.
+    columns:
+      - name: supplier_id
+        description: The unique key for each supplier.
+        data_tests:
+          - not_null
+          - unique
+      - name: supplier_name
+        description: The name of the supplier company.
+      - name: avg_spend_share_pct
+        description: Average monthly spend share as a decimal.
+      - name: concentration_risk_level
+        description: Risk classification (high_concentration_risk, moderate, low, diversified).
+      - name: is_concentration_risk
+        description: Boolean flag for suppliers with >30% average spend share.
+      - name: lifetime_spend
+        description: Total lifetime spend with this supplier in USD.
+
+  - name: rpt_delivery_performance_monthly
+    config:
+      tags: ['type:report', 'cadence:monthly']
+    description: Monthly delivery on-time rate by supplier with shipment volume metrics.
+    columns:
+      - name: supplier_id
+        description: The foreign key to the supplier.
+        data_tests:
+          - not_null
+      - name: supplier_name
+        description: The name of the supplier company.
+      - name: delivery_month
+        description: The month of the delivery shipments.
+        data_tests:
+          - not_null
+      - name: total_shipments
+        description: Total shipments in the month.
+      - name: on_time_shipments
+        description: Number of on-time shipments in the month.
+      - name: monthly_on_time_rate
+        description: On-time delivery rate for the month.
+      - name: avg_transit_days
+        description: Average actual transit days for the month.
+
+  - name: rpt_inventory_aging
+    config:
+      tags: ['type:report']
+    description: Inventory aging analysis categorizing items by days since last inbound movement.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: The foreign key to the location.
+        data_tests:
+          - not_null
+      - name: current_quantity
+        description: Current quantity on hand.
+      - name: days_since_last_inbound
+        description: Number of days since the last inbound movement.
+      - name: aging_bucket
+        description: Age category (0-30 days, 31-60 days, 61-90 days, 90+ days).
+      - name: aging_status
+        description: Status classification (fresh, monitor, warning, critical).
+
+  - name: rpt_purchase_order_summary
+    config:
+      tags: ['type:report']
+    description: Monthly purchase order volume, value, and average size trends with month-over-month changes.
+    columns:
+      - name: order_month
+        description: The month of the purchase orders.
+        data_tests:
+          - not_null
+          - unique
+      - name: total_orders
+        description: Total number of purchase orders in the month.
+      - name: total_value
+        description: Total PO value in USD for the month.
+      - name: avg_order_value
+        description: Average purchase order value in USD.
+      - name: cancellation_rate
+        description: Proportion of orders that were cancelled.
+      - name: order_count_mom_change
+        description: Month-over-month change in order count as a decimal.
+      - name: order_value_mom_change
+        description: Month-over-month change in order value as a decimal.
+
+  - name: rpt_waste_cost_impact
+    config:
+      tags: ['type:report']
+    description: Financial impact of waste by product, location, and reason with cost share analysis.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: The foreign key to the location.
+        data_tests:
+          - not_null
+      - name: waste_reason
+        description: The reason for waste.
+        data_tests:
+          - not_null
+      - name: total_waste_cost
+        description: Total cost of waste in USD for this product/location/reason.
+      - name: waste_cost_share
+        description: This group's share of total waste cost across all products.
+      - name: waste_cost_rank
+        description: Rank by total waste cost (1 = highest cost).
+
+  - name: rpt_supply_chain_kpis
+    config:
+      tags: ['type:report']
+    description: Composite KPI dashboard with inventory turnover, fill rate, lead time, waste rate, and delivery metrics.
+    columns:
+      - name: avg_inventory_turnover
+        description: Average inventory turnover ratio across all product-locations.
+      - name: fill_rate
+        description: Proportion of tracked items above their reorder point.
+      - name: overall_avg_lead_time_days
+        description: Overall average supplier lead time in days.
+      - name: avg_waste_rate
+        description: Average waste rate across all products.
+      - name: total_waste_cost
+        description: Total cost of waste in USD.
+      - name: delivery_on_time_rate
+        description: Average on-time delivery rate across all suppliers.
+
+  - name: rpt_reorder_recommendation
+    config:
+      tags: ['type:report']
+    description: Items currently below reorder point with recommended order quantities and priority ranking.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: The foreign key to the location.
+        data_tests:
+          - not_null
+      - name: stock_alert_level
+        description: Current alert severity (out_of_stock, critical, reorder_needed, low_stock).
+      - name: recommended_order_quantity
+        description: Adjusted recommended order quantity based on urgency.
+      - name: priority_rank
+        description: Priority ranking (1 = most urgent).
+      - name: estimated_days_of_stock
+        description: Estimated days until stockout at current depletion rate.
+
+  - name: rpt_seasonal_demand_pattern
+    config:
+      tags: ['type:report']
+    description: Seasonal patterns in ingredient demand by month-of-year with seasonality index.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: supply_id
+        description: The foreign key to the supply/ingredient.
+        data_tests:
+          - not_null
+      - name: month_of_year
+        description: Month number (1-12).
+        data_tests:
+          - not_null
+      - name: avg_monthly_units
+        description: Average units demanded in this month of year.
+      - name: seasonality_index
+        description: Ratio of this month's demand to overall average (above 1.0 = above-average demand).
+      - name: months_of_data
+        description: Number of data points for this month-of-year.
+
+  - name: rpt_supplier_spend_trend
+    config:
+      tags: ['type:report']
+    description: Monthly supplier spend with month-over-month and year-over-year comparisons.
+    columns:
+      - name: supplier_id
+        description: The foreign key to the supplier.
+        data_tests:
+          - not_null
+      - name: supplier_name
+        description: The name of the supplier company.
+      - name: order_month
+        description: The month of the purchase orders.
+        data_tests:
+          - not_null
+      - name: total_spend
+        description: Total spend in USD for the month.
+      - name: mom_spend_change
+        description: Month-over-month spend change as a decimal.
+      - name: yoy_spend_change
+        description: Year-over-year spend change as a decimal.
+      - name: cumulative_spend
+        description: Running cumulative spend in USD.
+
+  - name: rpt_warehouse_capacity_forecast
+    config:
+      tags: ['type:report']
+    description: Warehouse capacity projection based on current growth rate, estimating when warehouses will reach capacity.
+    columns:
+      - name: warehouse_id
+        description: The unique key for each warehouse.
+        data_tests:
+          - not_null
+          - unique
+      - name: warehouse_name
+        description: The name of the warehouse.
+      - name: capacity_units
+        description: Total storage capacity in standard units.
+      - name: current_utilization_rate
+        description: Current utilization as a decimal (e.g., 0.75 = 75%).
+      - name: remaining_capacity
+        description: Remaining capacity in standard units.
+      - name: avg_monthly_growth_units
+        description: Average monthly net inventory growth in units.
+      - name: months_until_full
+        description: Estimated months until warehouse reaches capacity at current growth rate.
+      - name: estimated_full_date
+        description: Projected date when the warehouse will reach capacity.

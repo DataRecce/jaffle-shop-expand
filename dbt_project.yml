@@ -29,10 +29,141 @@ seeds:
     +schema: raw
     jaffle-data:
       +enabled: "{{ var('load_source_data', false) }}"
+    finance-data:
+      +enabled: "{{ var('load_source_data', false) }}"
+    supply-chain-data:
+      +enabled: "{{ var('load_source_data', false) }}"
+    marketing-data:
+      +enabled: "{{ var('load_source_data', false) }}"
+    hr-ops-data:
+      +enabled: "{{ var('load_source_data', false) }}"
+    product-data:
+      +enabled: "{{ var('load_source_data', false) }}"
 
 models:
   jaffle_shop:
     staging:
       +materialized: view
+      +tags: ['layer:staging', 'domain:core']
+      finance:
+        +tags: ['domain:finance']
+      supply_chain:
+        +tags: ['domain:supply_chain']
+      marketing:
+        +tags: ['domain:marketing']
+      hr_ops:
+        +tags: ['domain:hr_ops']
+      product:
+        +tags: ['domain:product']
+      derived:
+        +tags: ['type:derived_staging']
+
+    intermediate:
+      +materialized: view
+      +tags: ['layer:intermediate']
+      finance:
+        +tags: ['domain:finance']
+      finance_deep:
+        +tags: ['domain:finance']
+      supply_chain:
+        +tags: ['domain:supply_chain']
+      supply_chain_deep:
+        +tags: ['domain:supply_chain']
+      marketing:
+        +tags: ['domain:marketing']
+      marketing_deep:
+        +tags: ['domain:marketing']
+      hr_ops:
+        +tags: ['domain:hr_ops']
+      hr_deep:
+        +tags: ['domain:hr_ops']
+      product:
+        +tags: ['domain:product']
+      product_deep:
+        +tags: ['domain:product']
+      cross_domain:
+        +tags: ['domain:cross_domain']
+      snapshots:
+        +tags: ['type:snapshot']
+      time_series:
+        +tags: ['type:time_series']
+      advanced:
+        +tags: ['domain:cross_domain']
+
+    utilities:
+      +materialized: view
+      +tags: ['layer:utility']
+
     marts:
       +materialized: table
+      +tags: ['layer:marts', 'domain:core']
+      finance:
+        +tags: ['domain:finance', 'criticality:high']
+      finance_advanced:
+        +tags: ['domain:finance', 'criticality:medium']
+      supply_chain:
+        +tags: ['domain:supply_chain', 'criticality:high']
+      supply_chain_advanced:
+        +tags: ['domain:supply_chain', 'criticality:medium']
+      marketing:
+        +tags: ['domain:marketing', 'criticality:high']
+      marketing_advanced:
+        +tags: ['domain:marketing', 'criticality:medium']
+      hr_ops:
+        +tags: ['domain:hr_ops', 'criticality:high']
+      hr_advanced:
+        +tags: ['domain:hr_ops', 'criticality:medium']
+      product:
+        +tags: ['domain:product', 'criticality:high']
+      product_advanced:
+        +tags: ['domain:product', 'criticality:medium']
+      cross_domain:
+        +tags: ['domain:cross_domain', 'criticality:high']
+      metrics:
+        +tags: ['type:metric', 'cadence:daily', 'criticality:medium']
+      scoring:
+        +tags: ['type:scoring', 'criticality:medium']
+      executive:
+        +tags: ['type:executive', 'criticality:high', 'audience:cfo']
+      data_quality:
+        +tags: ['type:data_quality', 'criticality:medium', 'audience:data_team']
+      cohorts:
+        +tags: ['type:cohort', 'criticality:medium']
+      funnels:
+        +tags: ['type:funnel', 'criticality:medium']
+      comparisons:
+        +tags: ['type:comparison', 'criticality:medium']
+      period_comparison:
+        +tags: ['type:comparison', 'criticality:medium']
+      ml_features:
+        +tags: ['type:ml_feature', 'criticality:medium', 'audience:data_team']
+      geo:
+        +tags: ['type:geo', 'criticality:medium']
+      role_views:
+        +tags: ['type:role_view', 'criticality:high']
+      incremental:
+        +tags: ['type:incremental', 'criticality:high']
+      reverse_etl:
+        +tags: ['type:reverse_etl', 'criticality:high']
+      wide_tables:
+        +tags: ['type:wide_table', 'criticality:medium']
+      mega_wide:
+        +tags: ['type:wide_table', 'criticality:medium']
+      advanced_sql:
+        +tags: ['type:advanced_sql', 'criticality:low']
+      trends:
+        +tags: ['type:trend', 'criticality:low']
+      rankings:
+        +tags: ['type:ranking', 'criticality:low']
+      alerts:
+        +tags: ['type:alert', 'criticality:high']
+      distributions:
+        +tags: ['type:distribution', 'criticality:low']
+      summaries:
+        +tags: ['type:summary', 'criticality:medium']
+      kpis:
+        +tags: ['type:kpi', 'criticality:high']
+      analytics:
+        +tags: ['type:report', 'criticality:medium']
+      narrow:
+        +tags: ['type:narrow', 'criticality:low']

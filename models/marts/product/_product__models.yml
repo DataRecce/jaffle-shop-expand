@@ -1,0 +1,383 @@
+models:
+  - name: fct_recipe_costs
+    config:
+      tags: ['type:fact']
+    description: Recipe cost fact table with per-ingredient cost breakdown and cost share. One row per recipe-ingredient combination.
+    columns:
+      - name: recipe_ingredient_id
+        description: The unique key for each recipe ingredient entry.
+        data_tests:
+          - not_null
+          - unique
+      - name: recipe_id
+        description: Foreign key to the recipe.
+      - name: recipe_name
+        description: Name of the recipe.
+      - name: menu_item_id
+        description: Foreign key to the menu item this recipe produces.
+      - name: ingredient_id
+        description: Foreign key to the ingredient.
+      - name: ingredient_name
+        description: Name of the ingredient.
+      - name: ingredient_line_cost
+        description: Total cost for this ingredient in this recipe in USD.
+      - name: cost_share_pct
+        description: This ingredient's share of the total recipe cost.
+
+  - name: fct_product_sales
+    config:
+      tags: ['type:fact']
+    description: Daily product sales fact table with cumulative and rolling metrics. One row per product per day.
+    columns:
+      - name: sale_date
+        description: The date of the sales.
+        data_tests:
+          - not_null
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+      - name: product_name
+        description: Name of the product.
+      - name: units_sold
+        description: Number of units sold on this date.
+      - name: daily_revenue
+        description: Total revenue for this product on this date in USD.
+      - name: cumulative_revenue
+        description: Running total of revenue for this product in USD.
+      - name: rolling_7d_avg_units
+        description: 7-day rolling average of daily units sold.
+
+  - name: fct_ingredient_usage
+    config:
+      tags: ['type:fact']
+    description: Daily ingredient usage fact table with rolling averages. One row per ingredient per day.
+    columns:
+      - name: order_date
+        description: The date of usage.
+        data_tests:
+          - not_null
+      - name: ingredient_id
+        description: Foreign key to the ingredient.
+        data_tests:
+          - not_null
+      - name: ingredient_name
+        description: Name of the ingredient.
+      - name: ingredient_category
+        description: Category of the ingredient.
+      - name: total_quantity_used
+        description: Total quantity consumed on this date.
+      - name: rolling_7d_avg_usage
+        description: 7-day rolling average of daily usage.
+
+  - name: fct_pricing_changes
+    config:
+      tags: ['type:fact']
+    description: Product pricing change fact table with change amounts and directions. One row per price change event.
+    columns:
+      - name: pricing_history_id
+        description: The unique key for each pricing change.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: Foreign key to the product.
+      - name: product_name
+        description: Name of the product.
+      - name: old_price
+        description: Previous price in USD.
+      - name: new_price
+        description: New price in USD.
+      - name: price_change_amount
+        description: Absolute price change in USD.
+      - name: price_change_pct
+        description: Price change as a percentage.
+      - name: price_change_direction
+        description: Direction of change (increase, decrease, no_change).
+      - name: price_changed_date
+        description: Date the price change took effect.
+
+  - name: dim_menu_items
+    config:
+      tags: ['type:dimension']
+    description: Menu item dimension table enriched with category, nutrition, and product data. One row per menu item.
+    columns:
+      - name: menu_item_id
+        description: The unique key for each menu item.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: Foreign key to the base product.
+      - name: menu_item_name
+        description: Display name of the menu item.
+      - name: menu_item_price
+        description: Current menu price in USD.
+      - name: category_name
+        description: Name of the menu category.
+      - name: calories
+        description: Total calories per serving.
+      - name: sodium_mg
+        description: Sodium in milligrams per serving.
+      - name: protein_g
+        description: Protein in grams per serving.
+
+  - name: dim_ingredients
+    config:
+      tags: ['type:dimension']
+    description: Ingredient dimension table with current pricing. One row per ingredient.
+    columns:
+      - name: ingredient_id
+        description: The unique key for each ingredient.
+        data_tests:
+          - not_null
+          - unique
+      - name: ingredient_name
+        description: Name of the ingredient.
+      - name: ingredient_category
+        description: Category of the ingredient.
+      - name: default_unit
+        description: Default unit of measure.
+      - name: is_perishable
+        description: Whether the ingredient is perishable.
+      - name: is_allergen
+        description: Whether the ingredient is a common allergen.
+      - name: current_unit_cost
+        description: Current unit cost in USD.
+
+  - name: dim_menu_categories
+    config:
+      tags: ['type:dimension']
+    description: Menu category dimension table with hierarchy. One row per category.
+    columns:
+      - name: menu_category_id
+        description: The unique key for each menu category.
+        data_tests:
+          - not_null
+          - unique
+      - name: parent_category_id
+        description: Foreign key to the parent category.
+      - name: category_name
+        description: Name of the menu category.
+      - name: category_description
+        description: Description of the category.
+      - name: category_depth
+        description: Depth in the category hierarchy.
+      - name: is_active_category
+        description: Whether the category is currently active.
+      - name: parent_category_name
+        description: Name of the parent category.
+
+  - name: dim_recipes
+    config:
+      tags: ['type:dimension']
+    description: Recipe dimension table with total cost and serving metrics. One row per recipe.
+    columns:
+      - name: recipe_id
+        description: The unique key for each recipe.
+        data_tests:
+          - not_null
+          - unique
+      - name: menu_item_id
+        description: Foreign key to the menu item this recipe produces.
+      - name: recipe_name
+        description: Name of the recipe.
+      - name: serving_size
+        description: Number of servings the recipe produces.
+      - name: is_active_recipe
+        description: Whether the recipe is currently in use.
+      - name: ingredient_count
+        description: Number of distinct ingredients.
+      - name: total_ingredient_cost
+        description: Total ingredient cost in USD.
+      - name: cost_per_serving
+        description: Ingredient cost per serving in USD.
+
+  - name: rpt_menu_profitability
+    config:
+      tags: ['type:report']
+    description: Menu profitability report combining margin analysis with sales volume. One row per menu item.
+    columns:
+      - name: menu_item_id
+        description: The unique key for each menu item.
+        data_tests:
+          - not_null
+          - unique
+      - name: menu_item_name
+        description: Display name of the menu item.
+      - name: menu_item_price
+        description: Current menu price in USD.
+      - name: total_ingredient_cost
+        description: Total ingredient cost per unit in USD.
+      - name: gross_margin
+        description: Gross margin per unit in USD.
+      - name: gross_margin_pct
+        description: Gross margin percentage.
+      - name: total_units_sold
+        description: Total units sold across all time.
+      - name: total_revenue
+        description: Total revenue across all time in USD.
+      - name: total_gross_profit
+        description: Total gross profit (margin x units sold) in USD.
+      - name: margin_tier
+        description: Margin classification (high, medium, low).
+
+  - name: rpt_category_performance
+    config:
+      tags: ['type:report']
+    description: Category performance report with revenue share analysis. One row per menu category.
+    columns:
+      - name: menu_category_id
+        description: The unique key for each menu category.
+        data_tests:
+          - not_null
+          - unique
+      - name: category_name
+        description: Name of the menu category.
+      - name: product_count
+        description: Number of distinct products in this category.
+      - name: total_units_sold
+        description: Total units sold across all products in this category.
+      - name: total_revenue
+        description: Total revenue for this category in USD.
+      - name: revenue_share_pct
+        description: This category's share of total revenue.
+
+  - name: rpt_ingredient_price_watch
+    config:
+      tags: ['type:report']
+    description: Ingredient price monitoring report with trend alerts. One row per ingredient per month.
+    columns:
+      - name: ingredient_id
+        description: Foreign key to the ingredient.
+        data_tests:
+          - not_null
+      - name: ingredient_name
+        description: Name of the ingredient.
+      - name: price_month
+        description: The month of the price data.
+        data_tests:
+          - not_null
+      - name: avg_unit_cost
+        description: Average unit cost for the month in USD.
+      - name: mom_cost_change_pct
+        description: Month-over-month cost change percentage.
+      - name: price_trend_status
+        description: Price trend classification (significant/moderate increase/decrease, stable).
+      - name: requires_attention
+        description: Whether the price change exceeds 10% and needs attention.
+
+  - name: rpt_seasonal_menu_impact
+    config:
+      tags: ['type:report']
+    description: Seasonal promotion impact report comparing promotion vs baseline sales. One row per product per promotion.
+    columns:
+      - name: product_id
+        description: Foreign key to the product.
+        data_tests:
+          - not_null
+      - name: product_name
+        description: Name of the product.
+      - name: season_name
+        description: Name of the season.
+      - name: promotion_name
+        description: Name of the promotion.
+      - name: promo_avg_daily_units
+        description: Average daily units sold during promotion.
+      - name: baseline_avg_daily_units
+        description: Average daily units sold outside promotion.
+      - name: sales_lift_pct
+        description: Percentage increase in daily sales during promotion.
+      - name: promotion_effectiveness
+        description: Effectiveness classification (strong_lift, moderate_lift, no_lift).
+
+  - name: rpt_product_mix_optimization
+    config:
+      tags: ['type:report']
+    description: Product mix optimization report with classification and affinity analysis. One row per product.
+    columns:
+      - name: product_id
+        description: The unique key for each product.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_name
+        description: Name of the product.
+      - name: product_type
+        description: Type of the product.
+      - name: total_units_sold
+        description: Total units sold across all time.
+      - name: total_revenue
+        description: Total revenue across all time in USD.
+      - name: revenue_contribution_pct
+        description: This product's share of total revenue.
+      - name: revenue_rank
+        description: Rank by total revenue.
+      - name: volume_rank
+        description: Rank by total units sold.
+      - name: top_paired_product_id
+        description: Product most frequently ordered together with this one.
+      - name: product_classification
+        description: Classification (star, strong_performer, volume_driver, underperformer).
+
+  - name: rpt_nutrition_compliance
+    config:
+      tags: ['type:report']
+    description: Nutrition compliance report flagging items exceeding health thresholds. One row per menu item.
+    columns:
+      - name: menu_item_id
+        description: The unique key for each menu item.
+        data_tests:
+          - not_null
+          - unique
+      - name: menu_item_name
+        description: Display name of the menu item.
+      - name: calories
+        description: Total calories per serving.
+      - name: sodium_mg
+        description: Sodium in milligrams per serving.
+      - name: total_sugars_g
+        description: Total sugars in grams per serving.
+      - name: caffeine_mg
+        description: Caffeine in milligrams per serving.
+      - name: exceeds_calorie_threshold
+        description: Whether calories exceed 600 per serving.
+      - name: exceeds_sodium_threshold
+        description: Whether sodium exceeds 1000mg per serving.
+      - name: exceeds_sugar_threshold
+        description: Whether sugars exceed 50g per serving.
+      - name: exceeds_caffeine_threshold
+        description: Whether caffeine exceeds 400mg per serving.
+      - name: compliance_status
+        description: Overall compliance status (compliant, warning, non_compliant).
+      - name: flag_count
+        description: Number of thresholds exceeded.
+
+  - name: rpt_pricing_elasticity
+    config:
+      tags: ['type:report']
+    description: Pricing elasticity report measuring volume impact of price changes. One row per pricing change event.
+    columns:
+      - name: pricing_history_id
+        description: The unique key for each pricing change.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: Foreign key to the product.
+      - name: product_name
+        description: Name of the product.
+      - name: old_price
+        description: Previous price in USD.
+      - name: new_price
+        description: New price in USD.
+      - name: price_change_pct
+        description: Price change as a percentage.
+      - name: avg_daily_units_before
+        description: Average daily units sold in 30 days before price change.
+      - name: avg_daily_units_after
+        description: Average daily units sold in 30 days after price change.
+      - name: volume_change_pct
+        description: Percentage change in daily volume after price change.
+      - name: price_elasticity
+        description: Price elasticity of demand (volume change % / price change %).

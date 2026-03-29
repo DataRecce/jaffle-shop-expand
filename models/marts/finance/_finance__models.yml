@@ -1,0 +1,391 @@
+models:
+  - name: fct_invoices
+    config:
+      tags: ['type:fact']
+    meta:
+      owner: finance
+      contains_pii: false
+      update_frequency: daily
+    description: Fact table for all invoices with enriched order and customer dimensions.
+    columns:
+      - name: invoice_id
+        description: The unique key for each invoice.
+        data_tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: Foreign key to the originating order.
+      - name: customer_id
+        description: Foreign key to the customer.
+      - name: customer_name
+        description: Full name of the customer.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: invoice_status
+        description: Current status of the invoice.
+      - name: subtotal
+        description: Invoice subtotal before tax in USD.
+      - name: tax_amount
+        description: Tax amount in USD.
+      - name: total_amount
+        description: Total invoice amount including tax in USD.
+      - name: amount_paid
+        description: Amount paid against this invoice in USD.
+      - name: amount_due
+        description: Remaining amount due in USD.
+      - name: issued_date
+        description: Date the invoice was issued.
+      - name: due_date
+        description: Date payment is due.
+      - name: paid_date
+        description: Date the invoice was fully paid.
+      - name: days_to_payment
+        description: Number of days from issuance to payment.
+      - name: days_overdue
+        description: Number of days past the due date.
+      - name: is_paid
+        description: Whether the invoice has been fully paid.
+      - name: is_overdue
+        description: Whether the invoice is past due.
+
+  - name: fct_refunds
+    config:
+      tags: ['type:fact']
+    description: Fact table for refund events with enrichment from invoices and orders.
+    columns:
+      - name: refund_id
+        description: The unique key for each refund.
+        data_tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: Foreign key to the order.
+      - name: invoice_id
+        description: Foreign key to the invoice.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: refund_reason
+        description: Reason for the refund.
+      - name: refund_status
+        description: Current status of the refund.
+      - name: refund_amount
+        description: Refund amount in USD.
+      - name: refund_pct_of_invoice
+        description: Refund as a percentage of the invoice total.
+      - name: days_to_resolution
+        description: Days from request to resolution.
+      - name: is_approved
+        description: Whether the refund was approved.
+      - name: is_full_refund
+        description: Whether this is a full refund of the invoice.
+
+  - name: fct_payment_transactions
+    config:
+      tags: ['type:fact']
+    description: Fact table for payment transactions with order context.
+    columns:
+      - name: payment_transaction_id
+        description: The unique key for each payment transaction.
+        data_tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: Foreign key to the order.
+      - name: payment_method
+        description: Payment method used.
+      - name: payment_status
+        description: Transaction status.
+      - name: payment_amount
+        description: Transaction amount in USD.
+      - name: processed_date
+        description: Date the payment was processed.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: is_completed
+        description: Whether the transaction completed successfully.
+      - name: is_gift_card_payment
+        description: Whether this was a gift card payment.
+
+  - name: fct_expenses
+    config:
+      tags: ['type:fact']
+    description: Fact table for operating expenses with category and location dimensions.
+    columns:
+      - name: expense_id
+        description: The unique key for each expense.
+        data_tests:
+          - not_null
+          - unique
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: location_name
+        description: Name of the store.
+      - name: expense_category_id
+        description: Foreign key to the expense category.
+      - name: category_name
+        description: Name of the expense category.
+      - name: expense_amount
+        description: Expense amount in USD.
+      - name: incurred_date
+        description: Date the expense was incurred.
+      - name: expense_month
+        description: Month the expense was incurred.
+
+  - name: dim_tax_rates
+    config:
+      tags: ['type:dimension']
+    description: Dimension table for tax rate configurations by jurisdiction.
+    columns:
+      - name: tax_rate_id
+        description: The unique key for each tax rate.
+        data_tests:
+          - not_null
+          - unique
+      - name: jurisdiction
+        description: Tax jurisdiction.
+      - name: tax_type
+        description: Type of tax.
+      - name: tax_rate_pct
+        description: Tax rate as a decimal percentage.
+      - name: effective_from_date
+        description: Date the rate became effective.
+      - name: effective_to_date
+        description: Date the rate expires.
+      - name: is_current
+        description: Whether this tax rate is currently active.
+
+  - name: dim_gift_cards
+    config:
+      tags: ['type:dimension']
+    description: Dimension table for gift card status and balances.
+    columns:
+      - name: gift_card_id
+        description: The unique key for each gift card.
+        data_tests:
+          - not_null
+          - unique
+      - name: card_number
+        description: Gift card number.
+      - name: customer_id
+        description: Foreign key to the customer.
+      - name: gift_card_status
+        description: Current status of the gift card.
+      - name: initial_balance
+        description: Original loaded balance in USD.
+      - name: latest_balance
+        description: Current remaining balance in USD.
+      - name: total_redeemed
+        description: Total amount redeemed in USD.
+      - name: is_expired
+        description: Whether the gift card has expired.
+      - name: is_fully_redeemed
+        description: Whether the balance has been fully used.
+
+  - name: dim_expense_categories
+    config:
+      tags: ['type:dimension']
+      contract:
+        enforced: true
+    description: Dimension table for expense classifications.
+    columns:
+      - name: expense_category_id
+        description: The unique key for each category.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+      - name: category_name
+        description: Name of the expense category.
+        data_type: varchar
+      - name: category_description
+        description: Description of the category.
+        data_type: varchar
+      - name: is_operating_expense
+        description: Whether this is an operating expense.
+        data_type: boolean
+      - name: is_cost_of_goods_sold
+        description: Whether this is a cost of goods sold.
+        data_type: boolean
+      - name: expense_classification
+        description: High-level classification (COGS, OpEx, Other).
+        data_type: varchar
+
+  - name: rpt_monthly_pnl_by_store
+    config:
+      tags: ['type:report', 'cadence:monthly']
+    description: Monthly profit and loss statement per store with gross and net margins.
+    columns:
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: location_name
+        description: Name of the store.
+      - name: report_month
+        description: Reporting month.
+      - name: gross_revenue
+        description: Gross revenue before tax in USD.
+      - name: cost_of_goods_sold
+        description: Total COGS in USD.
+      - name: gross_profit
+        description: Revenue minus COGS in USD.
+      - name: operating_expenses
+        description: Total operating expenses in USD.
+      - name: operating_income
+        description: Gross profit minus operating expenses in USD.
+      - name: net_income
+        description: Revenue minus all expenses in USD.
+      - name: gross_margin_pct
+        description: Gross profit as a percentage of revenue.
+      - name: net_margin_pct
+        description: Net income as a percentage of revenue.
+
+  - name: rpt_revenue_by_payment_method
+    config:
+      tags: ['type:report']
+    description: Revenue breakdown by payment method over time.
+    columns:
+      - name: payment_method
+        description: Payment method.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: revenue_month
+        description: Reporting month.
+      - name: order_count
+        description: Number of orders using this method.
+      - name: payment_method_revenue
+        description: Revenue from this payment method in USD.
+      - name: revenue_share_pct
+        description: This method's share of total location revenue.
+
+  - name: rpt_refund_analysis
+    config:
+      tags: ['type:report']
+    description: Refund rates, reasons, and trends by store and month.
+    columns:
+      - name: report_month
+        description: Reporting month.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: refund_reason
+        description: Reason for the refund.
+      - name: refund_count
+        description: Number of refunds.
+      - name: total_refund_amount
+        description: Total refund amount in USD.
+      - name: avg_days_to_resolution
+        description: Average days to resolve refunds.
+      - name: refund_rate
+        description: Refund count as a percentage of invoices.
+      - name: refund_amount_rate
+        description: Refund amount as a percentage of invoice revenue.
+
+  - name: rpt_gift_card_liability
+    config:
+      tags: ['type:report']
+    description: Outstanding gift card balances representing financial liability.
+    columns:
+      - name: gift_card_status
+        description: Status of the gift cards in this group.
+      - name: card_count
+        description: Number of gift cards.
+      - name: total_outstanding_balance
+        description: Total outstanding balance in USD.
+      - name: active_liability
+        description: Liability from active, non-expired, non-redeemed cards in USD.
+      - name: total_active_liability
+        description: Grand total of active liability across all groups in USD.
+
+  - name: rpt_budget_variance
+    config:
+      tags: ['type:report']
+    description: Budget vs actual with variance analysis and severity classification.
+    columns:
+      - name: budget_id
+        description: The unique key for each budget entry.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: location_name
+        description: Name of the store.
+      - name: budget_type
+        description: Type of budget (revenue or expense).
+      - name: budget_month
+        description: Budget month.
+      - name: budgeted_amount
+        description: Budgeted amount in USD.
+      - name: actual_amount
+        description: Actual amount in USD.
+      - name: variance_amount
+        description: Actual minus budgeted in USD.
+      - name: variance_pct
+        description: Variance as a percentage of budget.
+      - name: variance_status
+        description: Whether variance is favorable or unfavorable.
+      - name: variance_severity
+        description: Severity level (on_track, warning, critical).
+
+  - name: rpt_ar_aging_summary
+    config:
+      tags: ['type:report']
+    description: Accounts receivable aging summary by bucket.
+    columns:
+      - name: aging_bucket
+        description: Aging category (current, 1-30, 31-60, 61-90, 90+ days).
+      - name: receivable_count
+        description: Number of outstanding receivables.
+      - name: customer_count
+        description: Number of customers with outstanding receivables.
+      - name: total_outstanding
+        description: Total outstanding amount in USD.
+      - name: avg_outstanding
+        description: Average outstanding amount per receivable in USD.
+      - name: pct_of_total
+        description: This bucket's share of total outstanding balance.
+
+  - name: rpt_daily_revenue_kpis
+    config:
+      tags: ['type:report', 'cadence:daily']
+    description: Daily KPI dashboard with revenue, average order value, and transaction metrics.
+    columns:
+      - name: revenue_date
+        description: The date.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: location_name
+        description: Name of the store.
+      - name: invoice_count
+        description: Number of invoices for the day.
+      - name: gross_revenue
+        description: Gross revenue in USD.
+      - name: total_revenue
+        description: Total revenue including tax in USD.
+      - name: avg_invoice_amount
+        description: Average invoice amount in USD.
+      - name: transaction_count
+        description: Total payment transactions.
+      - name: revenue_per_order
+        description: Revenue per order in USD.
+      - name: transaction_success_rate
+        description: Percentage of successful transactions.
+
+  - name: rpt_tax_collection_summary
+    config:
+      tags: ['type:report']
+    description: Tax collected by jurisdiction and period with cumulative totals.
+    columns:
+      - name: jurisdiction
+        description: Tax jurisdiction.
+      - name: tax_type
+        description: Type of tax.
+      - name: tax_rate_pct
+        description: Applied tax rate.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: tax_month
+        description: Month of tax collection.
+      - name: taxable_amount
+        description: Total taxable amount in USD.
+      - name: tax_collected
+        description: Tax collected in USD.
+      - name: effective_tax_rate
+        description: Actual tax collected divided by taxable amount.
+      - name: cumulative_tax_collected
+        description: Running total of tax collected for this jurisdiction.

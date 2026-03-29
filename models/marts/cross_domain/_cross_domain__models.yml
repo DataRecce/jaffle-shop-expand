@@ -1,0 +1,407 @@
+version: 2
+
+models:
+  - name: dim_customer_360
+    config:
+      tags: ['type:dimension']
+    meta:
+      owner: data_platform
+      contains_pii: true
+      update_frequency: daily
+    description: >
+      Master customer dimension joining all customer-centric intermediate models:
+      LTV, RFM scores, loyalty data, preferred store, preferred products, and
+      marketing response into a single comprehensive customer view.
+    columns:
+      - name: customer_id
+        description: Unique customer identifier.
+        data_type: integer
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        description: Full name of the customer.
+        data_type: varchar
+      - name: lifetime_spend
+        description: Total amount spent across all orders.
+        data_type: double
+      - name: rfm_total_score
+        description: Combined RFM score (3-15).
+        data_type: bigint
+      - name: loyalty_tier
+        description: Current loyalty program tier.
+        data_type: varchar
+      - name: preferred_store_name
+        description: Name of the customer's most visited store.
+        data_type: varchar
+      - name: marketing_engagement_level
+        description: Level of engagement with marketing campaigns.
+        data_type: varchar
+
+  - name: rpt_customer_segments
+    config:
+      tags: ['type:report']
+    description: >
+      Customer segmentation report based on RFM scores, classifying customers
+      into actionable segments (Champion, Loyal, At Risk, Lost, etc.)
+      with aggregate metrics per segment.
+    columns:
+      - name: customer_segment
+        description: Segment name based on RFM classification.
+        tests:
+          - not_null
+      - name: customer_count
+        description: Number of customers in this segment.
+      - name: segment_pct
+        description: Percentage of total customers in this segment.
+      - name: segment_revenue_share_pct
+        description: Percentage of total revenue from this segment.
+
+  - name: rpt_customer_cohort_retention
+    config:
+      tags: ['type:report']
+    description: >
+      Monthly cohort retention analysis grouping customers by their first
+      purchase month and tracking what percentage remain active in
+      subsequent months.
+    columns:
+      - name: cohort_month
+        description: Month of customers' first purchase.
+      - name: cohort_size
+        description: Number of customers who first purchased in this month.
+      - name: months_since_first_order
+        description: Number of months elapsed since the cohort's first purchase.
+      - name: retention_rate_pct
+        description: Percentage of cohort still active at this point.
+
+  - name: rpt_churn_risk_dashboard
+    config:
+      tags: ['type:report']
+    description: >
+      Dashboard of customers at risk of churning based on declining order
+      frequency, long gaps since last order, and other behavioral signals.
+      Includes recommended retention actions.
+    columns:
+      - name: customer_id
+        description: Unique customer identifier.
+      - name: churn_risk_level
+        description: Risk classification (high_risk/medium_risk/watch/active).
+      - name: customer_value_priority
+        description: Priority based on customer lifetime value (high/medium/low).
+      - name: recommended_action
+        description: Suggested retention action for this customer.
+
+  - name: rpt_customer_journey_summary
+    config:
+      tags: ['type:report']
+    description: >
+      Customer journey metrics from acquisition through loyalty progression,
+      including acquisition source, milestones, and current journey stage.
+    columns:
+      - name: customer_id
+        description: Unique customer identifier.
+        tests:
+          - unique
+          - not_null
+      - name: acquisition_source
+        description: Channel through which the customer was acquired.
+      - name: journey_stage
+        description: Current stage in the customer journey.
+      - name: days_to_loyalty_enrollment
+        description: Days between first order and loyalty program enrollment.
+
+  - name: rpt_high_value_customer_profile
+    config:
+      tags: ['type:report']
+    description: >
+      Detailed profile of top 10% customers by lifetime spend including
+      their preferences, loyalty status, and behavioral patterns.
+    columns:
+      - name: customer_id
+        description: Unique customer identifier.
+        tests:
+          - unique
+          - not_null
+      - name: spend_percentile_rank
+        description: Customer's percentile rank by lifetime spend.
+      - name: engagement_status
+        description: Current engagement status (active/cooling/at_risk).
+      - name: monthly_spend_rate
+        description: Estimated monthly spend rate based on tenure.
+
+  - name: dim_store_profile
+    config:
+      tags: ['type:dimension']
+    description: >
+      Master store dimension combining location details with financial metrics,
+      staffing data, inventory summary, and marketing spend into a single
+      store-level view.
+    columns:
+      - name: location_id
+        description: Unique store location identifier.
+        tests:
+          - unique
+          - not_null
+      - name: store_name
+        description: Name of the store location.
+      - name: total_revenue
+        description: Cumulative revenue for the store.
+      - name: avg_operating_margin_pct
+        description: Average operating margin percentage.
+      - name: avg_labor_cost_pct
+        description: Average labor cost as percentage of revenue.
+
+  - name: rpt_store_pnl
+    config:
+      tags: ['type:report']
+    description: >
+      Full profit and loss statement per store per month including revenue,
+      labor, operating expenses, marketing spend, inventory holding costs,
+      and calculated profit margins.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+      - name: report_month
+        description: Month of the P&L statement.
+      - name: monthly_revenue
+        description: Total revenue for the month.
+      - name: net_profit
+        description: Revenue minus all cost categories.
+      - name: net_profit_margin_pct
+        description: Net profit as percentage of revenue.
+
+  - name: rpt_store_benchmarking
+    config:
+      tags: ['type:report']
+    description: >
+      Store performance benchmarking against fleet averages for revenue,
+      operating margin, labor cost percentage, and revenue per employee.
+    columns:
+      - name: store_id
+        description: Store location identifier.
+        tests:
+          - unique
+          - not_null
+      - name: margin_performance
+        description: Classification relative to fleet (above_average/average/below_average).
+      - name: labor_cost_flag
+        description: Labor cost classification relative to fleet.
+      - name: revenue_rank
+        description: Store rank by total revenue.
+
+  - name: rpt_store_performance_quadrant
+    config:
+      tags: ['type:report']
+    description: >
+      BCG-style 2x2 matrix classifying stores as Stars, Cash Cows, Question
+      Marks, or Dogs based on revenue growth vs profitability relative
+      to fleet medians.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+        tests:
+          - unique
+          - not_null
+      - name: quadrant
+        description: Classification (Star/Cash Cow/Question Mark/Dog).
+      - name: revenue_growth_pct
+        description: Month-over-month revenue growth percentage.
+      - name: strategic_recommendation
+        description: Suggested strategic action for the store.
+
+  - name: rpt_gross_margin_analysis
+    config:
+      tags: ['type:report']
+    description: >
+      Gross margin analysis by product and category, showing margin tiers,
+      rankings, and comparison against category averages.
+    columns:
+      - name: product_id
+        description: Product identifier.
+      - name: gross_margin_pct
+        description: Gross margin as percentage of revenue.
+      - name: margin_tier
+        description: Margin classification (high_margin/medium_margin/low_margin).
+      - name: margin_rank_overall
+        description: Product rank by absolute gross margin.
+
+  - name: rpt_break_even_by_store
+    config:
+      tags: ['type:report']
+    description: >
+      Break-even analysis per store per month calculating break-even revenue,
+      contribution margin, and margin of safety.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+      - name: report_month
+        description: Month of the analysis.
+      - name: break_even_revenue
+        description: Revenue required to cover fixed costs.
+      - name: margin_of_safety_pct
+        description: How far above break-even the store is operating.
+      - name: break_even_status
+        description: Whether store is above, below, or at negative contribution.
+
+  - name: rpt_demand_planning_dashboard
+    config:
+      tags: ['type:report']
+    description: >
+      Supply-demand gap analysis dashboard with stockout risk flags,
+      demand trends, and recommended procurement actions per product.
+    columns:
+      - name: product_id
+        description: Product identifier.
+      - name: stock_status
+        description: Current stock status classification.
+      - name: supply_demand_gap
+        description: Difference between available stock and forecasted demand.
+      - name: action_priority
+        description: Numeric priority for action (1=highest).
+      - name: recommended_action
+        description: Suggested procurement action.
+
+  - name: rpt_menu_availability_risk
+    config:
+      tags: ['type:report']
+    description: >
+      Menu items at risk of becoming unavailable based on ingredient-level
+      stock status from the supply chain domain.
+    columns:
+      - name: product_id
+        description: Menu product identifier.
+      - name: menu_availability_status
+        description: Availability classification (cannot_produce/production_at_risk/monitor/fully_available).
+      - name: risk_priority
+        description: Numeric risk priority (1=highest).
+      - name: pct_ingredients_at_risk
+        description: Percentage of ingredients that are at risk or unavailable.
+
+  - name: rpt_operational_efficiency_scorecard
+    config:
+      tags: ['type:report']
+    description: >
+      Store-level operational efficiency scorecard combining order throughput,
+      revenue per labor hour, peak utilization, and a composite efficiency score.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+      - name: avg_orders_per_hour
+        description: Average hourly order throughput.
+      - name: avg_revenue_per_labor_hour
+        description: Revenue generated per labor hour.
+      - name: efficiency_score
+        description: Composite efficiency score (0-100).
+      - name: efficiency_rank
+        description: Store rank by efficiency.
+
+  - name: rpt_peak_hour_staffing
+    config:
+      tags: ['type:report']
+    description: >
+      Recommended staffing levels during peak hours compared to current
+      staffing, with gap analysis and staffing recommendations.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+      - name: order_hour
+        description: Hour of the day (0-23).
+      - name: recommended_staff
+        description: Recommended number of staff for this hour.
+      - name: staffing_gap
+        description: Difference between recommended and current staff.
+      - name: staffing_recommendation
+        description: Staffing action recommendation.
+
+  - name: rpt_speed_of_service_proxy
+    config:
+      tags: ['type:report']
+    description: >
+      Speed of service proxy using orders per labor hour and estimated
+      minutes per order by store and time period.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+      - name: order_hour
+        description: Hour of the day (0-23).
+      - name: orders_per_employee_per_hour
+        description: Orders handled per employee per hour.
+      - name: est_minutes_per_order
+        description: Estimated minutes to process one order.
+      - name: throughput_classification
+        description: Throughput relative to store average (high/normal/low).
+
+  - name: rpt_supplier_risk_matrix
+    config:
+      tags: ['type:report']
+    description: >
+      Supplier risk assessment combining concentration risk, lead time
+      reliability, and quality scores into a composite risk matrix.
+    columns:
+      - name: supplier_id
+        description: Unique supplier identifier.
+        tests:
+          - unique
+          - not_null
+      - name: composite_risk_score
+        description: Average of concentration, reliability, and quality risk scores.
+      - name: overall_risk_level
+        description: Risk classification (critical/high/medium/low).
+      - name: spend_concentration_pct
+        description: Supplier's share of total procurement spend.
+
+  - name: rpt_food_cost_variance_alert
+    config:
+      tags: ['type:report']
+    description: >
+      Alerts for stores where food cost percentage deviates more than 2
+      standard deviations from the fleet average, flagging anomalies.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+      - name: report_month
+        description: Month of the measurement.
+      - name: food_cost_pct
+        description: Food cost as percentage of revenue.
+      - name: z_score
+        description: Number of standard deviations from fleet mean.
+      - name: is_anomaly
+        description: Whether the food cost is anomalous (>2 std dev).
+      - name: alert_type
+        description: Type of alert (high_cost_alert/low_cost_alert/normal).
+
+  - name: rpt_labor_compliance
+    config:
+      tags: ['type:report']
+    description: >
+      Labor compliance report flagging shifts exceeding legal limits (>10 hours),
+      missing breaks on long shifts, and overtime concentration (>40 hrs/week).
+    columns:
+      - name: employee_id
+        description: Employee identifier.
+      - name: violation_type
+        description: Type of violation (long_shift/missing_break/overtime_excess).
+      - name: violation_description
+        description: Human-readable description of the violation.
+      - name: store_total_violations
+        description: Total violations at this store.
+
+  - name: rpt_financial_anomaly_detection
+    config:
+      tags: ['type:report']
+    description: >
+      Financial anomaly detection flagging unusual patterns including revenue
+      drops >20%, refund rate outliers, and negative profit margins.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+      - name: revenue_month
+        description: Month of the observation.
+      - name: anomaly_severity
+        description: Severity classification (critical/high/medium/normal).
+      - name: anomaly_count
+        description: Number of different anomaly types detected simultaneously.
+      - name: is_revenue_drop_anomaly
+        description: Whether a revenue drop >20% was detected.
+      - name: is_refund_rate_anomaly
+        description: Whether the refund rate is an outlier.

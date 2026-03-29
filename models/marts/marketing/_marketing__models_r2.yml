@@ -1,0 +1,298 @@
+models:
+  - name: rpt_campaign_channel_comparison
+    config:
+      tags: ['type:report']
+    description: >
+      Compares campaign performance across marketing channels including ROI,
+      reach, estimated conversion, and revenue per impression.
+      One row per channel.
+    columns:
+      - name: campaign_channel
+        description: The marketing channel.
+        data_tests:
+          - not_null
+          - unique
+      - name: channel_roi
+        description: Return on investment for this channel.
+      - name: total_estimated_impressions
+        description: Total estimated impressions across all campaigns in this channel.
+      - name: estimated_conversion_rate
+        description: Orders per estimated impression.
+
+  - name: rpt_coupon_segment_analysis
+    config:
+      tags: ['type:report']
+    description: >
+      Customer segment analysis of coupon usage showing which segments
+      use coupons most and their incremental revenue contribution.
+      One row per customer segment.
+    columns:
+      - name: customer_segment
+        description: Customer value segment.
+        data_tests:
+          - not_null
+          - unique
+      - name: redemption_share
+        description: This segment's share of total coupon redemptions.
+      - name: revenue_share
+        description: This segment's share of total coupon-driven net revenue.
+      - name: discount_efficiency_ratio
+        description: Net revenue generated per dollar of discount given.
+
+  - name: rpt_loyalty_churn_dashboard
+    config:
+      tags: ['type:report']
+    description: >
+      Dashboard of at-risk loyalty members with activity history,
+      tier details, and churn risk classification.
+      One row per active loyalty member with risk assessment.
+    columns:
+      - name: loyalty_member_id
+        description: The unique key for each loyalty member.
+        data_tests:
+          - not_null
+      - name: churn_risk_level
+        description: Risk classification (critical, high, medium, low, healthy).
+        data_tests:
+          - not_null
+      - name: days_since_last_transaction
+        description: Number of days since last loyalty transaction.
+      - name: current_tier_name
+        description: Member's current loyalty tier.
+
+  - name: rpt_email_optimization
+    config:
+      tags: ['type:report']
+    description: >
+      Email send time optimization report ranking time slots by
+      engagement score (weighted open + click rates).
+      One row per hour-day combination.
+    columns:
+      - name: hour_of_day
+        description: Hour of day (0-23).
+        data_tests:
+          - not_null
+      - name: day_of_week
+        description: Day of week (0-6).
+        data_tests:
+          - not_null
+      - name: engagement_score
+        description: Composite engagement score (60% open rate + 40% click rate).
+      - name: send_time_quality
+        description: Quality classification (optimal, good, average, poor).
+      - name: overall_rank
+        description: Rank by engagement score (1 = best).
+
+  - name: rpt_referral_viral_coefficient
+    config:
+      tags: ['type:report']
+    description: >
+      Referral program viral coefficient and virality analysis.
+      Single summary row with K-factor and program metrics.
+    columns:
+      - name: viral_coefficient
+        description: >
+          Viral coefficient (K-factor) = avg referrals per referrer
+          times conversion rate. K >= 1 means viral growth.
+      - name: virality_tier
+        description: Classification (viral_growth, strong_referral, moderate_referral, low_referral).
+      - name: total_referrers
+        description: Number of unique customers who made referrals.
+      - name: referral_program_roi
+        description: ROI of the referral program.
+
+  - name: rpt_social_media_roi
+    config:
+      tags: ['type:report']
+    description: >
+      Social media engagement metrics combined with revenue attribution
+      from social campaigns. One row per social platform.
+    columns:
+      - name: platform
+        description: Social media platform name.
+        data_tests:
+          - not_null
+          - unique
+      - name: avg_engagement_rate
+        description: Average engagement rate across posts on this platform.
+      - name: social_campaign_revenue
+        description: Revenue attributed to social campaigns.
+      - name: cost_per_engagement
+        description: Social campaign spend divided by total engagements.
+      - name: revenue_per_click
+        description: Social campaign revenue divided by total clicks.
+
+  - name: rpt_marketing_spend_efficiency
+    config:
+      tags: ['type:report']
+    description: >
+      Monthly marketing spend efficiency showing spend as percentage
+      of revenue, revenue per dollar spent, and cost per order.
+      One row per month.
+    columns:
+      - name: month
+        description: Calendar month.
+        data_tests:
+          - not_null
+      - name: marketing_spend
+        description: Total marketing spend in the month.
+      - name: revenue
+        description: Total order revenue in the month.
+      - name: spend_to_revenue_ratio
+        description: Marketing spend as a proportion of revenue.
+      - name: revenue_per_spend_dollar
+        description: Revenue generated per dollar of marketing spend.
+
+  - name: rpt_loyalty_tier_migration
+    config:
+      tags: ['type:report']
+    description: >
+      Monthly loyalty tier migration flows showing member movement
+      between tiers (upgrades, downgrades, retained).
+      One row per month-tier-transition combination.
+    columns:
+      - name: activity_month
+        description: Calendar month of the tier transition.
+        data_tests:
+          - not_null
+      - name: previous_month_tier
+        description: Member's tier in the previous month.
+      - name: current_month_tier
+        description: Member's tier in the current month.
+      - name: transition_type
+        description: Type of transition (upgraded, downgraded, retained).
+        data_tests:
+          - not_null
+      - name: member_count
+        description: Number of members who made this transition.
+
+  - name: rpt_campaign_calendar
+    config:
+      tags: ['type:report']
+    description: >
+      Campaign timeline view with overlap detection, phase classification,
+      and effectiveness metrics. One row per campaign.
+    columns:
+      - name: campaign_id
+        description: The unique key for each campaign.
+        data_tests:
+          - not_null
+          - unique
+      - name: campaign_phase
+        description: Current phase (upcoming, active, completed).
+      - name: concurrent_campaign_count
+        description: Number of other campaigns that overlap with this one.
+      - name: effectiveness_tier
+        description: Performance classification from campaign effectiveness report.
+
+  - name: rpt_customer_reactivation
+    config:
+      tags: ['type:report']
+    description: >
+      Dormant customers reactivated by campaign coupons. A customer is
+      considered dormant if 90+ days passed between orders.
+      One row per reactivation event.
+    columns:
+      - name: customer_id
+        description: Foreign key to customers.
+        data_tests:
+          - not_null
+      - name: order_id
+        description: The reactivation order.
+        data_tests:
+          - not_null
+      - name: days_since_previous_order
+        description: Days of dormancy before this reactivation order.
+      - name: campaign_name
+        description: Campaign that drove the reactivation.
+      - name: reactivation_driver
+        description: Type of reactivation driver (campaign_coupon).
+
+  - name: rpt_coupon_expiry_forecast
+    config:
+      tags: ['type:report']
+    description: >
+      Upcoming coupon expirations with projected unused liability
+      and utilization rates. One row per coupon.
+    columns:
+      - name: coupon_id
+        description: The unique key for each coupon.
+        data_tests:
+          - not_null
+          - unique
+      - name: days_until_expiry
+        description: Days remaining until coupon expires (null if no expiry).
+      - name: expiry_status
+        description: >
+          Expiry classification (expiring_this_week, expiring_this_month,
+          expiring_this_quarter, long_term_valid, no_expiry, expired).
+      - name: estimated_unused_liability
+        description: Estimated dollar liability from unused fixed-amount redemptions.
+      - name: utilization_rate
+        description: Ratio of actual redemptions to maximum allowed.
+
+  - name: rpt_marketing_mix_summary
+    config:
+      tags: ['type:report']
+    description: >
+      Overall marketing mix showing spend, reach, and ROI by channel
+      per month. One row per month-channel combination.
+    columns:
+      - name: month
+        description: Calendar month.
+        data_tests:
+          - not_null
+      - name: spend_channel
+        description: Marketing channel.
+        data_tests:
+          - not_null
+      - name: monthly_channel_spend
+        description: Spend in this channel for the month.
+      - name: channel_spend_share
+        description: This channel's share of total monthly spend.
+      - name: channel_roi
+        description: Overall ROI for this channel.
+
+  - name: rpt_loyalty_revenue_impact
+    config:
+      tags: ['type:report']
+    description: >
+      Revenue from loyalty vs non-loyalty customers over time showing
+      share of revenue and order volume. One row per month-loyalty status.
+    columns:
+      - name: order_month
+        description: Calendar month.
+        data_tests:
+          - not_null
+      - name: is_loyalty_customer
+        description: Whether the customer is an active loyalty member.
+        data_tests:
+          - not_null
+      - name: total_revenue
+        description: Total revenue from this customer group in the month.
+      - name: revenue_share
+        description: This group's share of total monthly revenue.
+      - name: avg_order_value
+        description: Average order value for this customer group.
+
+  - name: rpt_first_purchase_attribution
+    config:
+      tags: ['type:report']
+    description: >
+      Attribution of each customer's first purchase to the channel that
+      drove their acquisition. One row per channel-source combination.
+    columns:
+      - name: attribution_channel
+        description: The channel attributed to driving the first purchase.
+        data_tests:
+          - not_null
+      - name: acquisition_source
+        description: Acquisition source type (referral, campaign, organic).
+        data_tests:
+          - not_null
+      - name: customers
+        description: Number of customers whose first purchase is attributed to this channel.
+      - name: total_first_order_revenue
+        description: Total revenue from first orders in this channel.
+      - name: customer_share
+        description: This channel's share of total first-purchase customers.

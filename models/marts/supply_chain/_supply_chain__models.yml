@@ -1,0 +1,331 @@
+models:
+  - name: fct_purchase_orders
+    config:
+      tags: ['type:fact']
+    description: Purchase order fact table with supplier details and line item summaries. One row per purchase order.
+    columns:
+      - name: purchase_order_id
+        description: The unique key for each purchase order.
+        data_tests:
+          - not_null
+          - unique
+      - name: supplier_id
+        description: The foreign key to the supplier.
+      - name: supplier_name
+        description: The name of the supplier company.
+      - name: po_status
+        description: Current status of the purchase order.
+      - name: total_amount
+        description: The total amount of the purchase order in USD.
+      - name: is_cancelled
+        description: Whether the purchase order was cancelled.
+      - name: is_completed
+        description: Whether the purchase order has been completed.
+
+  - name: fct_inventory_movements
+    config:
+      tags: ['type:fact']
+    description: Inventory movement fact table enriched with product and location details. One row per movement.
+    columns:
+      - name: movement_id
+        description: The unique key for each inventory movement.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: The foreign key to the product.
+      - name: product_name
+        description: The name of the product.
+      - name: location_id
+        description: The foreign key to the location.
+      - name: location_name
+        description: The name of the location.
+      - name: movement_type
+        description: The type of movement (inbound, outbound, transfer, adjustment).
+      - name: quantity
+        description: The signed quantity moved.
+      - name: absolute_quantity
+        description: The unsigned quantity moved.
+      - name: is_inbound
+        description: Whether the movement is inbound.
+      - name: is_outbound
+        description: Whether the movement is outbound.
+      - name: moved_at
+        description: The date the movement occurred.
+
+  - name: fct_waste_events
+    config:
+      tags: ['type:fact']
+    description: Waste event fact table enriched with product and location details. One row per waste event.
+    columns:
+      - name: waste_log_id
+        description: The unique key for each waste event.
+        data_tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: The foreign key to the product.
+      - name: product_name
+        description: The name of the product.
+      - name: location_id
+        description: The foreign key to the location.
+      - name: waste_reason
+        description: The reason for waste.
+      - name: quantity_wasted
+        description: The quantity of product wasted.
+      - name: cost_of_waste
+        description: The cost of the wasted inventory in USD.
+      - name: wasted_at
+        description: The date the waste was recorded.
+
+  - name: fct_deliveries
+    config:
+      tags: ['type:fact']
+    description: Delivery fact table with shipment details, transit metrics, and on-time indicators. One row per shipment.
+    columns:
+      - name: shipment_id
+        description: The unique key for each shipment.
+        data_tests:
+          - not_null
+          - unique
+      - name: purchase_order_id
+        description: The foreign key to the purchase order.
+      - name: supplier_id
+        description: The foreign key to the supplier.
+      - name: shipment_status
+        description: Current status of the shipment.
+      - name: actual_transit_days
+        description: Number of days from shipment to actual arrival.
+      - name: is_on_time
+        description: Whether the shipment arrived on or before the estimated date.
+      - name: is_delivered
+        description: Whether the shipment has been delivered.
+      - name: is_delayed
+        description: Whether the shipment is delayed.
+
+  - name: dim_suppliers
+    config:
+      tags: ['type:dimension']
+    description: Supplier dimension with contract summary information. One row per supplier.
+    columns:
+      - name: supplier_id
+        description: The unique key for each supplier.
+        data_tests:
+          - not_null
+          - unique
+      - name: supplier_name
+        description: The name of the supplier company.
+      - name: is_active
+        description: Whether the supplier is currently active.
+      - name: total_contracts
+        description: Total number of contracts with this supplier.
+      - name: active_contracts
+        description: Number of currently active contracts.
+      - name: min_contracted_lead_time_days
+        description: Shortest contracted lead time in days.
+      - name: latest_contract_expiration
+        description: The latest contract expiration date.
+
+  - name: dim_warehouses
+    config:
+      tags: ['type:dimension']
+    description: Warehouse dimension table. One row per warehouse.
+    columns:
+      - name: warehouse_id
+        description: The unique key for each warehouse.
+        data_tests:
+          - not_null
+          - unique
+      - name: warehouse_name
+        description: The name of the warehouse.
+      - name: warehouse_type
+        description: The type of warehouse.
+      - name: capacity_units
+        description: The total storage capacity in standard units.
+      - name: is_active
+        description: Whether the warehouse is currently operational.
+
+  - name: rpt_inventory_turnover
+    config:
+      tags: ['type:report']
+    description: Inventory turnover analysis by product and location, comparing outbound volume to current stock levels.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: The foreign key to the location.
+        data_tests:
+          - not_null
+      - name: inventory_turnover_ratio
+        description: Ratio of total outbound quantity to current stock level.
+      - name: total_outbound_quantity
+        description: Total outbound quantity for the product at this location.
+      - name: current_stock
+        description: Current stock level.
+
+  - name: rpt_supplier_scorecard
+    config:
+      tags: ['type:report']
+    description: Comprehensive supplier performance scorecard combining spend, fulfillment, and lead time metrics.
+    columns:
+      - name: supplier_id
+        description: The unique key for each supplier.
+        data_tests:
+          - not_null
+          - unique
+      - name: supplier_name
+        description: The name of the supplier company.
+      - name: lifetime_spend
+        description: Total lifetime spend with this supplier in USD.
+      - name: fulfillment_rate
+        description: Rate of fully fulfilled purchase orders.
+      - name: avg_lead_time_days
+        description: Average actual lead time in days.
+      - name: on_time_delivery_rate
+        description: Proportion of orders delivered on or before expected date.
+
+  - name: rpt_waste_analysis
+    config:
+      tags: ['type:report']
+    description: Waste analysis by product and waste reason, including waste rate relative to inbound inventory.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: waste_reason
+        description: The reason for waste.
+        data_tests:
+          - not_null
+      - name: total_quantity_wasted
+        description: Total quantity wasted for this product and reason.
+      - name: total_cost_of_waste
+        description: Total cost of waste in USD.
+      - name: waste_rate
+        description: Ratio of total wasted quantity to total inbound quantity for this product.
+
+  - name: rpt_stock_alerts
+    config:
+      tags: ['type:report']
+    description: Stock alert report identifying products that need reordering or are at risk of stockout.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: The foreign key to the location.
+        data_tests:
+          - not_null
+      - name: stock_alert_level
+        description: Alert severity (out_of_stock, critical, reorder_needed, low_stock, healthy).
+      - name: current_quantity
+        description: Current inventory quantity.
+      - name: reorder_point
+        description: Quantity threshold below which a reorder should be triggered.
+      - name: needs_reorder
+        description: Boolean indicating if current quantity is below the reorder point.
+
+  - name: rpt_procurement_spend
+    config:
+      tags: ['type:report']
+    description: Procurement spend report by supplier and month with share-of-spend analysis.
+    columns:
+      - name: supplier_id
+        description: The foreign key to the supplier.
+        data_tests:
+          - not_null
+      - name: order_month
+        description: The month of the purchase orders.
+        data_tests:
+          - not_null
+      - name: total_spend
+        description: Total spend with this supplier in the month in USD.
+      - name: spend_share_of_month
+        description: This supplier's share of total monthly procurement spend.
+
+  - name: rpt_demand_vs_supply
+    config:
+      tags: ['type:report']
+    description: Demand vs supply analysis comparing depletion rates to current inventory levels.
+    columns:
+      - name: product_id
+        description: The foreign key to the product.
+        data_tests:
+          - not_null
+      - name: location_id
+        description: The foreign key to the location.
+        data_tests:
+          - not_null
+      - name: supply_demand_status
+        description: Classification of supply-demand balance (supply_shortage, balanced, oversupplied, no_demand, no_stock).
+      - name: supply_to_demand_ratio
+        description: Ratio of total inbound to total outbound inventory.
+      - name: estimated_days_of_stock
+        description: Estimated number of days until stock is depleted.
+
+  - name: rpt_warehouse_utilization
+    config:
+      tags: ['type:report']
+    description: Warehouse utilization report showing capacity usage and activity metrics.
+    columns:
+      - name: warehouse_id
+        description: The unique key for each warehouse.
+        data_tests:
+          - not_null
+          - unique
+      - name: warehouse_name
+        description: The name of the warehouse.
+      - name: utilization_rate
+        description: Ratio of total units stored to capacity.
+      - name: available_capacity
+        description: Remaining capacity in standard units.
+      - name: total_units_stored
+        description: Current total units stored.
+      - name: distinct_products_stored
+        description: Number of distinct products in the warehouse.
+
+  - name: rpt_supplier_lead_time_trends
+    config:
+      tags: ['type:report']
+    description: Monthly lead time trends by supplier showing performance over time.
+    columns:
+      - name: supplier_id
+        description: The foreign key to the supplier.
+        data_tests:
+          - not_null
+      - name: order_month
+        description: The month of the purchase orders.
+        data_tests:
+          - not_null
+      - name: avg_lead_time_days
+        description: Average actual lead time in days for the month.
+      - name: monthly_on_time_rate
+        description: On-time delivery rate for the month.
+      - name: overall_avg_lead_time_days
+        description: Overall average lead time for comparison.
+      - name: overall_on_time_rate
+        description: Overall on-time delivery rate for comparison.
+
+  - name: rpt_po_fulfillment_summary
+    config:
+      tags: ['type:report']
+    description: Purchase order fulfillment summary with fill rates by supplier.
+    columns:
+      - name: purchase_order_id
+        description: The unique key for each purchase order.
+        data_tests:
+          - not_null
+          - unique
+      - name: supplier_id
+        description: The foreign key to the supplier.
+      - name: supplier_name
+        description: The name of the supplier.
+      - name: po_fulfillment_status
+        description: Overall fulfillment status of the purchase order.
+      - name: quantity_fill_rate
+        description: Ratio of quantity received to quantity ordered.
+      - name: line_fill_rate
+        description: Ratio of fully received lines to total lines.

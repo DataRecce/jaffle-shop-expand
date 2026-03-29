@@ -1,0 +1,351 @@
+models:
+  - name: fct_shifts
+    config:
+      tags: ['type:fact']
+    description: >
+      Shift fact table with employee and location details, including
+      actual vs scheduled hours, no-show flags, and late arrival indicators.
+    columns:
+      - name: shift_id
+        description: The unique key for each shift.
+        data_tests:
+          - not_null
+          - unique
+      - name: employee_id
+        description: Foreign key to the employee.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: employee_name
+        description: Full name of the employee.
+      - name: department_name
+        description: Department the employee belongs to.
+      - name: position_title
+        description: Employee's position title.
+      - name: location_name
+        description: Name of the store location.
+      - name: shift_date
+        description: Date of the shift.
+      - name: shift_type
+        description: Type of shift.
+      - name: shift_status
+        description: Status of the shift.
+      - name: scheduled_hours
+        description: Number of scheduled hours.
+      - name: actual_hours
+        description: Number of actual hours worked.
+      - name: is_no_show
+        description: Whether the employee did not show up.
+      - name: is_late_arrival
+        description: Whether the employee arrived late.
+
+  - name: fct_timecards
+    config:
+      tags: ['type:fact']
+    description: >
+      Timecard fact table with employee details, net hours worked
+      (after breaks), and overtime calculation.
+    columns:
+      - name: timecard_id
+        description: The unique key for each timecard entry.
+        data_tests:
+          - not_null
+          - unique
+      - name: employee_id
+        description: Foreign key to the employee.
+      - name: hours_worked
+        description: Total hours worked.
+      - name: net_hours_worked
+        description: Hours worked minus break time.
+      - name: overtime_hours
+        description: Hours exceeding the 8-hour daily threshold.
+
+  - name: fct_payroll
+    config:
+      tags: ['type:fact']
+    description: >
+      Payroll fact table with employee details, pay period information,
+      effective hourly rate, and deduction percentage.
+    columns:
+      - name: payroll_id
+        description: The unique key for each payroll record.
+        data_tests:
+          - not_null
+          - unique
+      - name: employee_id
+        description: Foreign key to the employee.
+      - name: gross_pay
+        description: Gross pay amount in USD.
+      - name: net_pay
+        description: Net pay amount in USD.
+      - name: effective_hourly_rate
+        description: Gross pay divided by hours worked.
+      - name: deduction_pct
+        description: Deductions as a percentage of gross pay.
+
+  - name: fct_maintenance_events
+    config:
+      tags: ['type:fact']
+    description: >
+      Maintenance event fact table joining logs with equipment and location
+      details, with warranty and emergency flags.
+    columns:
+      - name: maintenance_log_id
+        description: The unique key for each maintenance event.
+        data_tests:
+          - not_null
+          - unique
+      - name: equipment_id
+        description: Foreign key to the equipment.
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: maintenance_cost
+        description: Cost of the maintenance in USD.
+      - name: downtime_hours
+        description: Hours of equipment downtime.
+      - name: is_under_warranty
+        description: Whether the equipment was under warranty at time of maintenance.
+      - name: is_emergency
+        description: Whether this was an emergency maintenance event.
+
+  - name: dim_employees
+    config:
+      tags: ['type:dimension']
+    meta:
+      owner: hr_operations
+      contains_pii: true
+      update_frequency: daily
+    description: >
+      Employee dimension combining enriched profiles with tenure
+      calculations and activity status.
+    columns:
+      - name: employee_id
+        description: The unique key for each employee.
+        data_tests:
+          - not_null
+          - unique
+      - name: full_name
+        description: Employee's full name.
+      - name: department_name
+        description: Department the employee belongs to.
+      - name: position_title
+        description: Employee's position title.
+      - name: tenure_days
+        description: Number of days employed.
+      - name: tenure_bucket
+        description: Tenure classification bucket.
+      - name: is_active
+        description: Whether the employee is currently active.
+
+  - name: dim_departments
+    config:
+      tags: ['type:dimension']
+      contract:
+        enforced: true
+    description: Department dimension table, one row per department.
+    columns:
+      - name: department_id
+        description: The unique key for each department.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+      - name: department_name
+        description: Name of the department.
+        data_type: varchar
+      - name: department_description
+        description: Description of the department.
+        data_type: varchar
+
+  - name: dim_positions
+    config:
+      tags: ['type:dimension']
+    description: >
+      Position dimension table with pay grade details and pay range spread.
+    columns:
+      - name: position_id
+        description: The unique key for each position.
+        data_tests:
+          - not_null
+          - unique
+      - name: position_title
+        description: Title of the position.
+      - name: pay_grade
+        description: Pay grade classification.
+      - name: min_hourly_rate
+        description: Minimum hourly rate in USD.
+      - name: max_hourly_rate
+        description: Maximum hourly rate in USD.
+      - name: pay_range_spread
+        description: Difference between max and min hourly rates.
+
+  - name: dim_equipment
+    config:
+      tags: ['type:dimension']
+    description: >
+      Equipment dimension table with location details, warranty status,
+      and age calculation.
+    columns:
+      - name: equipment_id
+        description: The unique key for each piece of equipment.
+        data_tests:
+          - not_null
+          - unique
+      - name: location_id
+        description: Foreign key to the store location.
+      - name: equipment_name
+        description: Name of the equipment.
+      - name: equipment_type
+        description: Type of equipment.
+      - name: is_under_warranty
+        description: Whether the equipment is currently under warranty.
+      - name: equipment_age_days
+        description: Age of the equipment in days since purchase.
+
+  - name: dim_training_courses
+    config:
+      tags: ['type:dimension']
+    description: Training course dimension table, one row per course.
+    columns:
+      - name: training_course_id
+        description: The unique key for each training course.
+        data_tests:
+          - not_null
+          - unique
+      - name: course_name
+        description: Name of the training course.
+      - name: course_category
+        description: Category of the course.
+      - name: duration_hours
+        description: Duration of the course in hours.
+      - name: is_required
+        description: Whether the course is required.
+      - name: is_active
+        description: Whether the course is currently active.
+
+  - name: rpt_labor_efficiency
+    config:
+      tags: ['type:report']
+    description: >
+      Monthly labor efficiency report by store, showing labor cost as a
+      percentage of revenue and revenue per labor hour. Uses stg_orders
+      as a revenue proxy.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+        data_tests:
+          - not_null
+      - name: report_month
+        description: Month of the report.
+      - name: monthly_labor_hours
+        description: Total labor hours for the month.
+      - name: monthly_labor_cost
+        description: Total labor cost for the month in USD.
+      - name: monthly_revenue
+        description: Total order revenue for the month in USD.
+      - name: monthly_labor_cost_pct
+        description: Labor cost as a percentage of revenue.
+      - name: monthly_revenue_per_labor_hour
+        description: Revenue generated per labor hour.
+
+  - name: rpt_scheduling_optimization
+    config:
+      tags: ['type:report']
+    description: >
+      Weekly scheduling optimization report by store, comparing staff
+      levels to order volume with staffing assessment classification.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+        data_tests:
+          - not_null
+      - name: report_week
+        description: Week of the report.
+      - name: avg_daily_staff
+        description: Average daily staff count.
+      - name: total_weekly_orders
+        description: Total orders for the week.
+      - name: staffing_assessment
+        description: Staffing assessment (understaffed, overstaffed, balanced).
+
+  - name: rpt_employee_turnover
+    config:
+      tags: ['type:report']
+    description: >
+      Employee turnover analysis by tenure bucket, showing termination
+      counts and turnover rates.
+    columns:
+      - name: tenure_bucket
+        description: Tenure classification bucket.
+        data_tests:
+          - not_null
+      - name: employee_count
+        description: Total employees in this tenure bucket.
+      - name: active_count
+        description: Number of currently active employees.
+      - name: terminated_count
+        description: Number of terminated employees.
+      - name: turnover_rate_pct
+        description: Turnover rate as a percentage.
+
+  - name: rpt_overtime_analysis
+    config:
+      tags: ['type:report']
+    description: >
+      Weekly overtime analysis by store, showing overtime hours, affected
+      employees, and overtime as a percentage of total hours.
+    columns:
+      - name: location_id
+        description: Store location identifier.
+        data_tests:
+          - not_null
+      - name: week_start
+        description: Start of the reporting week.
+      - name: employees_with_overtime
+        description: Number of employees with overtime hours.
+      - name: total_overtime_hours
+        description: Total overtime hours for the week.
+      - name: overtime_pct_of_total_hours
+        description: Overtime as a percentage of total hours worked.
+
+  - name: rpt_equipment_reliability
+    config:
+      tags: ['type:report']
+    description: >
+      Equipment reliability report showing maintenance frequency, downtime,
+      costs, and emergency event rates per piece of equipment.
+    columns:
+      - name: equipment_id
+        description: The unique key for each piece of equipment.
+        data_tests:
+          - not_null
+          - unique
+      - name: equipment_name
+        description: Name of the equipment.
+      - name: total_maintenance_events
+        description: Total number of maintenance events.
+      - name: total_downtime_hours
+        description: Total downtime hours across all events.
+      - name: total_maintenance_cost
+        description: Total maintenance cost in USD.
+      - name: emergency_pct
+        description: Percentage of maintenance events that were emergencies.
+
+  - name: rpt_training_completion
+    config:
+      tags: ['type:report']
+    description: >
+      Training completion report by department, showing compliance rates,
+      average scores, and non-compliant employee counts.
+    columns:
+      - name: department_name
+        description: Department name.
+        data_tests:
+          - not_null
+      - name: total_employees
+        description: Total active employees in the department.
+      - name: avg_required_completion_pct
+        description: Average required course completion percentage.
+      - name: compliance_rate_pct
+        description: Percentage of employees fully compliant with required training.
+      - name: avg_training_score
+        description: Average training assessment score.
