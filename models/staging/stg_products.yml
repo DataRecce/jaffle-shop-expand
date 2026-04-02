@@ -1,6 +1,8 @@
 models:
   - name: stg_products
-    description: Product (food and drink items that can be ordered) data with basic cleaning and transformation applied, one row per product.
+    description: Product data with cleaning and transformation applied, one row per product.
+    config:
+      tags: ['core-dimension']
     columns:
       - name: product_id
         description: The unique key for each product.

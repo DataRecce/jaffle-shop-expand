@@ -1,6 +1,9 @@
 models:
   - name: stg_customers
     description: Customer data with basic cleaning and transformation applied, one row per customer.
+    deprecation_date: 2027-01-01
+    config:
+      tags: ['pii', 'deprecated']
     columns:
       - name: customer_id
         description: The unique key for each customer.

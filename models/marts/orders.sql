@@ -68,7 +68,13 @@ customer_order_count as (
         row_number() over (
             partition by customer_id
             order by ordered_at asc
-        ) as customer_order_number
+        ) as customer_order_number,
+
+        case
+            when order_items_subtotal >= 50 then 'large'
+            when order_items_subtotal >= 20 then 'medium'
+            else 'small'
+        end as order_size
 
     from compute_booleans
 
