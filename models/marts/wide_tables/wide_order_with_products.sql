@@ -28,7 +28,7 @@ select
     1 as quantity,
     oi.supply_cost,
     mi.menu_item_price as line_revenue,
-    0,
+    0 as discount_amount,
     im.gross_margin_pct,
     coalesce(0, 0) as line_margin
 

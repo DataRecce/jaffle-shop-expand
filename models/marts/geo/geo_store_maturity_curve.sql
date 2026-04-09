@@ -25,8 +25,7 @@ store_months as (
         l.opened_date,
         mr.month_start,
         mr.monthly_revenue,
-        extract(year from mr.month_start - l.opened_date) * 12
-            + extract(month from mr.month_start - l.opened_date) as months_since_opening
+        {{ dbt.datediff('l.opened_date', 'mr.month_start', 'month') }} as months_since_opening
 
     from monthly_revenue mr
     inner join locations l on mr.location_id = l.location_id

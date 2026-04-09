@@ -74,17 +74,58 @@ all_events as (
 
 ),
 
+-- Aggregate distinct event types per day
+-- (DuckDB listagg does not support DISTINCT; pre-dedup for compatibility)
+daily_event_types as (
+
+    select
+        event_date,
+        {% if target.type == 'snowflake' %}
+        listagg(event_type, ', ') within group (order by event_type) as event_types
+        {% else %}
+        listagg(event_type, ', ' order by event_type) as event_types
+        {% endif %}
+    from (
+        select distinct event_date, event_type
+        from all_events
+    )
+    group by 1
+
+),
+
+-- Aggregate distinct event categories per day
+daily_event_categories as (
+
+    select
+        event_date,
+        {% if target.type == 'snowflake' %}
+        listagg(event_category, ', ') within group (order by event_category) as event_categories
+        {% else %}
+        listagg(event_category, ', ' order by event_category) as event_categories
+        {% endif %}
+    from (
+        select distinct event_date, event_category
+        from all_events
+    )
+    group by 1
+
+),
+
 -- Count events per day for the calendar view
 daily_event_summary as (
 
     select
-        event_date,
+        ae.event_date,
         count(*) as event_count,
-        count(distinct event_category) as category_count,
-        string_agg(distinct event_type, ', ' order by event_type) as event_types,
-        string_agg(distinct event_category, ', ' order by event_category) as event_categories
-    from all_events
-    group by 1
+        count(distinct ae.event_category) as category_count,
+        det.event_types,
+        dec2.event_categories
+    from all_events as ae
+    inner join daily_event_types as det
+        on ae.event_date = det.event_date
+    inner join daily_event_categories as dec2
+        on ae.event_date = dec2.event_date
+    group by 1, det.event_types, dec2.event_categories
 
 ),
 

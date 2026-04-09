@@ -44,7 +44,7 @@ allergen_map as (
         r.recipe_name,
         count(case when i.is_allergen then 1 end) as allergen_ingredient_count,
         count(*) as total_ingredient_count,
-        string_agg(case when i.is_allergen then i.ingredient_name end, ', ') as allergen_list
+        listagg(case when i.is_allergen then i.ingredient_name end, ', ') as allergen_list
     from recipe_ingredients as ri
     inner join ingredients as i on ri.ingredient_id = i.ingredient_id
     inner join recipes as r on ri.recipe_id = r.recipe_id

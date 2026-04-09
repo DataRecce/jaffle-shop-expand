@@ -49,9 +49,9 @@ pre_post_comparison as (
         count(distinct case when ds.sale_date >= pl.launch_date then ds.sale_date end) as post_launch_days
     from daily_sales as ds
     inner join products as p on ds.product_id = p.product_id
-    cross join product_launch as pl
-    where pl.product_id != ds.product_id
-        and p.product_type = (select pt.product_type from pt where pt.product_id = pl.product_id)
+    inner join product_launch as pl on pl.product_id != ds.product_id
+    inner join products as pl_prod on pl.product_id = pl_prod.product_id
+    where p.product_type = pl_prod.product_type
     group by 1, 2, 3, 4
 
 ),

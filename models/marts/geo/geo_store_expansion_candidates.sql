@@ -12,7 +12,6 @@ high_performers as (
     select
         sh.location_id,
         sp.store_name,
-        sp.location_id,
         sh.store_health_score,
         sh.revenue_growth_score,
         sh.profitability_score
@@ -24,7 +23,6 @@ high_performers as (
 select
     location_id,
     store_name,
-    location_id,
     store_health_score,
     revenue_growth_score,
     profitability_score,

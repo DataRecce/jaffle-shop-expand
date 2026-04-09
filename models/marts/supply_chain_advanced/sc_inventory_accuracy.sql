@@ -27,7 +27,7 @@ left join (
     select
         product_id,
         location_id,
-        arg_max(quantity_available, counted_at) as quantity_available,
+        max_by(quantity_available, counted_at) as quantity_available,
         max(counted_at) as counted_at
     from {{ ref('stg_inventory_counts') }}
     group by product_id, location_id

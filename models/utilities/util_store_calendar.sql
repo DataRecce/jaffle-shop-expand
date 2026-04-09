@@ -24,7 +24,7 @@ store_calendar as (
         ds.is_weekend,
         l.location_id,
         l.location_name,
-        ds.date_day - l.opened_date as days_since_opening
+        datediff('day', l.opened_date, ds.date_day) as days_since_opening
 
     from date_spine as ds
 

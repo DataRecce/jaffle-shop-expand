@@ -17,13 +17,28 @@ order_items as (
 
 ),
 
+-- Deduplicate products per order (needed for Snowflake which does not support
+-- DISTINCT inside array_agg with WITHIN GROUP)
+order_products_deduped as (
+
+    select distinct
+        order_id,
+        product_id
+    from order_items
+
+),
+
 -- Get distinct product set per order for mix-change detection
 order_product_sets as (
 
     select
         order_id,
-        array_agg(distinct product_id order by product_id) as product_ids
-    from order_items
+        {% if target.type == 'snowflake' %}
+        array_agg(product_id) within group (order by product_id) as product_ids
+        {% else %}
+        array_agg(product_id order by product_id) as product_ids
+        {% endif %}
+    from order_products_deduped
     group by 1
 
 ),
@@ -106,7 +121,7 @@ final as (
         -- Days between consecutive orders
         case
             when prev_ordered_at is not null
-            then extract(epoch from (ordered_at - prev_ordered_at)) / 86400.0
+            then {{ dbt.datediff('prev_ordered_at', 'ordered_at', 'day') }}
             else null
         end as days_between_orders,
 

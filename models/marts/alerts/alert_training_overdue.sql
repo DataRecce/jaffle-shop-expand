@@ -14,7 +14,7 @@ employee_training as (
         e.full_name,
         e.location_id,
         max(tc.completed_date) as last_training_date,
-        extract(day from (current_date - max(tc.completed_date)))::integer as days_since_training
+        datediff('day', max(tc.completed_date), current_date) as days_since_training
     from e
     left join tc on e.employee_id = tc.employee_id
     where e.is_active

@@ -39,7 +39,7 @@ select
     sq.quality_score,
     lt.avg_lead_time_days,
     sc.fulfillment_rate,
-    1 - sc.fulfillment_rate,
+    1 - sc.fulfillment_rate as defect_rate,
     case
         when sq.quality_score >= 80 then 'preferred'
         when sq.quality_score >= 60 then 'approved'

@@ -23,12 +23,12 @@ daily_sales as (
     select
         o.ordered_at as sale_date,
         oi.product_id,
-        p.product_name,
-        p.product_type,
-        p.product_price as current_unit_price,
+        any_value(p.product_name) as product_name,
+        any_value(p.product_type) as product_type,
+        any_value(p.product_price) as current_unit_price,
         count(oi.order_item_id) as units_sold,
         count(distinct oi.order_id) as order_count,
-        count(oi.order_item_id) * p.product_price as daily_revenue
+        count(oi.order_item_id) * any_value(p.product_price) as daily_revenue
 
     from order_items as oi
     inner join orders as o
@@ -37,10 +37,7 @@ daily_sales as (
         on oi.product_id = p.product_id
     group by
         o.ordered_at,
-        oi.product_id,
-        p.product_name,
-        p.product_type,
-        p.product_price
+        oi.product_id
 
 )
 
