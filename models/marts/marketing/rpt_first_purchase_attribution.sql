@@ -1,8 +1,8 @@
 with first_orders as (
     select
         customer_id,
-        arg_min(order_id, ordered_at) as first_order_id,
-        cast(arg_min(order_total, ordered_at) as float) as first_order_total,
+        min_by(order_id, ordered_at) as first_order_id,
+        cast(min_by(order_total, ordered_at) as float) as first_order_total,
         min(ordered_at) as first_order_date
     from {{ ref('stg_orders') }}
     group by customer_id

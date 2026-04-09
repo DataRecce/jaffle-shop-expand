@@ -26,6 +26,28 @@ default:
       password: "{{ env_var('SNOWFLAKE_PASSWORD', 'dummy_password') }}"
       role: "{{ env_var('SNOWFLAKE_ROLE', 'SYSADMIN') }}"
       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
-      database: "{{ env_var('SNOWFLAKE_DATABASE', 'JAFFLE_SHOP') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'JAFFLE_SHOP_EXPAND') }}"
+      schema: JAFFLE_SHOP_EXPAND
+      threads: 4
+
+    snowflake-current:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT', 'dummy_account') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', 'dummy_user') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD', 'dummy_password') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'SYSADMIN') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'JAFFLE_SHOP_EXPAND') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA', 'DEV') }}"
+      threads: 4
+
+    snowflake-base:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT', 'dummy_account') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', 'dummy_user') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD', 'dummy_password') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'SYSADMIN') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'JAFFLE_SHOP_EXPAND') }}"
       schema: public
       threads: 4

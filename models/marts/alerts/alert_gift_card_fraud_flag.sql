@@ -13,7 +13,7 @@ gc_activity as (
         gc.initial_balance - gc.latest_balance as total_spent,
         case
             when gc.initial_balance - gc.latest_balance > gc.initial_balance * 0.9
-                and extract(day from (current_date - gc.issued_date))::integer < 2
+                and datediff('day', gc.issued_date, current_date) < 2
             then true
             else false
         end as rapid_drain_flag,

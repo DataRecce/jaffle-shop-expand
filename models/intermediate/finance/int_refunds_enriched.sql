@@ -41,7 +41,7 @@ enriched as (
         end as refund_pct_of_invoice,
         case
             when r.resolved_date is not null
-                then r.resolved_date - r.requested_date
+                then datediff('day', r.requested_date, r.resolved_date)
         end as days_to_resolution
 
     from refunds as r

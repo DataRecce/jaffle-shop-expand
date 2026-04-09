@@ -4,7 +4,7 @@ completions as (
     select
         employee_id,
         training_course_id,
-        extract(day from (completed_date - started_date))::integer as completion_days
+        datediff('day', started_date, completed_date) as completion_days
     from {{ ref('stg_training_completions') }}
     where completed_date is not null and started_date is not null
 ),

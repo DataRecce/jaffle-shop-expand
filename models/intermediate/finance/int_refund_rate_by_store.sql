@@ -38,7 +38,7 @@ monthly_refunds as (
         sum(re.refund_amount) as total_refund_amount,
         avg(re.refund_amount) as avg_refund_amount,
         count(case when re.refund_status = 'approved' then 1 end) as approved_refund_count,
-        avg(extract(day from re.days_to_resolution))::numeric as avg_days_to_resolution
+        avg(re.days_to_resolution)::numeric as avg_days_to_resolution
 
     from refunds_enriched as re
     group by 1, 2

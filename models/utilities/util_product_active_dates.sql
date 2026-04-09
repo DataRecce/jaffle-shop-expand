@@ -45,11 +45,11 @@ final as (
         p.product_type,
         por.first_ordered_at as active_from,
         por.last_ordered_at as last_seen_at,
-        extract(day from (por.last_ordered_at - por.first_ordered_at))::integer as active_days,
+        datediff('day', por.first_ordered_at, por.last_ordered_at) as active_days,
         por.total_orders,
         por.total_units_sold,
         case
-            when extract(day from (current_date - por.last_ordered_at))::integer <= 30 then true
+            when datediff('day', por.last_ordered_at, current_date) <= 30 then true
             else false
         end as is_currently_active
 

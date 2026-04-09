@@ -231,8 +231,8 @@ order_product_types as (
     select
         oib.date_day,
         oib.order_id,
-        bool_or(oib.product_type = 'food')                                 as has_food,
-        bool_or(oib.product_type = 'beverage')                             as has_beverage,
+        max(case when oib.product_type = 'food' then true else false end)   as has_food,
+        max(case when oib.product_type = 'beverage' then true else false end) as has_beverage,
         count(distinct oib.product_id)                                      as items_in_order
     from order_items_base oib
     group by 1, 2

@@ -15,7 +15,6 @@ store_health as (
 select
     sp.location_id,
     sp.store_name,
-    sp.location_id,
     sh.store_health_score,
     sh.revenue_growth_score,
     sh.profitability_score,

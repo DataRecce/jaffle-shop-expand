@@ -29,7 +29,7 @@ select
     cl.location_id,
     cl.current_quantity,
     iv.inventory_value,
-    0,
+    0 as safety_stock,
     t.inventory_turnover_ratio,
     sa.stock_alert_level as stock_alert,
     sa.reorder_point,
