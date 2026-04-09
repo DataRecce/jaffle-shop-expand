@@ -22,29 +22,38 @@ member_monthly as (
 
 ),
 
+-- Lookup: for each earned_tier_name, find a representative current_tier_name
+-- (used to determine if a member's current tier is below the earned tier)
+earned_tier_lookup as (
+
+    select
+        earned_tier_name,
+        min(current_tier_name) as reference_tier_name
+    from tier_progression
+    where earned_tier_name is not null
+    group by 1
+
+),
+
 tier_transitions as (
 
     select
-        loyalty_member_id,
-        customer_id,
-        current_tier_name,
-        earned_tier_name,
-        activity_month,
+        mm.loyalty_member_id,
+        mm.customer_id,
+        mm.current_tier_name,
+        mm.earned_tier_name,
+        mm.activity_month,
         case
-            when current_tier_name = earned_tier_name then 'maintained'
-            when earned_tier_name is null then 'unknown'
-            when current_tier_name != earned_tier_name
-                and current_tier_name < coalesce(
-                    (select t2.current_tier_name
-                     from tier_progression as t2
-                     where t2.earned_tier_name = member_monthly.earned_tier_name
-                     limit 1),
-                    ''
-                )
+            when mm.current_tier_name = mm.earned_tier_name then 'maintained'
+            when mm.earned_tier_name is null then 'unknown'
+            when mm.current_tier_name != mm.earned_tier_name
+                and mm.current_tier_name < coalesce(etl.reference_tier_name, '')
             then 'upgrade_pending'
             else 'maintained'
         end as tier_movement_type
-    from member_monthly
+    from member_monthly as mm
+    left join earned_tier_lookup as etl
+        on mm.earned_tier_name = etl.earned_tier_name
 
 ),
 

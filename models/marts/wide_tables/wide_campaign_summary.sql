@@ -28,7 +28,7 @@ select
     ce.total_spend,
     ce.attributed_revenue,
     ce.attributed_orders,
-    round(ce.roi_ratio * 100, 2),
+    round(ce.roi_ratio * 100, 2) as roi_pct,
     ce.cost_per_order,
     cr.attributed_revenue as roi_attributed_revenue,
     case

@@ -44,7 +44,7 @@ monthly_summary as (
         count(distinct case when stage_3_approved then refund_id end) as approved,
         count(distinct case when stage_3_denied then refund_id end) as denied,
         count(distinct case when stage_4_processed then refund_id end) as processed,
-        round(avg(extract(day from days_to_resolution)::numeric), 1) as avg_days_to_resolution,
+        round(avg(days_to_resolution), 1) as avg_days_to_resolution,
         round(
             (count(distinct case when stage_3_approved then refund_id end) * 100.0
             / nullif(count(distinct refund_id), 0)), 2

@@ -6,9 +6,9 @@ overdue_ar as (
         customer_id,
         amount_outstanding,
         due_date,
-        extract(day from (current_date - due_date))::integer
+        datediff('day', due_date, current_date) as days_overdue
     from {{ ref('int_accounts_receivable_aging') }}
-    where extract(day from (current_date - due_date))::integer > 90
+    where datediff('day', due_date, current_date) > 90
 ),
 
 alerts as (
@@ -17,11 +17,11 @@ alerts as (
         customer_id,
         amount_outstanding,
         due_date,
-        extract(day from (current_date - due_date))::integer,
+        days_overdue,
         'ar_overdue_90_days' as alert_type,
         case
-            when extract(day from (current_date - due_date))::integer > 180 then 'critical'
-            when extract(day from (current_date - due_date))::integer > 120 then 'warning'
+            when days_overdue > 180 then 'critical'
+            when days_overdue > 120 then 'warning'
             else 'info'
         end as severity
     from overdue_ar

@@ -419,8 +419,8 @@ active_flags as (
 
     select
         o.customer_id,
-        bool_or(o.ordered_at >= current_date - 30)                          as is_active_last_30d,
-        bool_or(o.ordered_at >= current_date - 90)                          as is_active_last_90d
+        max(case when o.ordered_at >= current_date - 30 then true else false end) as is_active_last_30d,
+        max(case when o.ordered_at >= current_date - 90 then true else false end) as is_active_last_90d
     from o
     group by 1
 

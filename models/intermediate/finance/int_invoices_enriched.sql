@@ -41,12 +41,12 @@ enriched as (
         o.ordered_at as order_date,
         case
             when inv.paid_date is not null
-                then extract(day from (inv.paid_date - inv.issued_date))::integer
+                then datediff('day', inv.issued_date, inv.paid_date)
             else null
         end as days_to_payment,
         case
             when inv.invoice_status = 'overdue'
-                then extract(day from (current_date - inv.due_date))::integer
+                then datediff('day', inv.due_date, current_date)
             else 0
         end as days_overdue
 

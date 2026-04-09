@@ -64,14 +64,11 @@ classified as (
         customer_id,
         last_order_date,
         lifetime_orders,
-        extract(day from ((month_start + interval '1 month' - interval '1 day')
-            - last_order_date))::integer as days_since_last_order,
+        datediff('day', last_order_date, month_start + interval '1 month' - interval '1 day') as days_since_last_order,
         case
-            when extract(day from ((month_start + interval '1 month' - interval '1 day')
-                - last_order_date))::integer <= 90
+            when datediff('day', last_order_date, month_start + interval '1 month' - interval '1 day') <= 90
                 then 'active'
-            when extract(day from ((month_start + interval '1 month' - interval '1 day')
-                - last_order_date))::integer <= 180
+            when datediff('day', last_order_date, month_start + interval '1 month' - interval '1 day') <= 180
                 then 'dormant'
             else 'churned'
         end as customer_status
