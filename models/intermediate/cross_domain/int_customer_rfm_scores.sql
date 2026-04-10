@@ -29,8 +29,8 @@ percentiles as (
     select
         customer_id,
         days_since_last_order,
-        order_count,
         total_spend,
+        order_count,
         ntile(5) over (order by days_since_last_order desc) as recency_score,
         ntile(5) over (order by order_count asc) as frequency_score,
         ntile(5) over (order by total_spend asc) as monetary_score
@@ -40,12 +40,12 @@ percentiles as (
 select
     customer_id,
     days_since_last_order,
-    order_count,
     total_spend,
+    order_count,
     recency_score,
     frequency_score,
     monetary_score,
-    recency_score + frequency_score + monetary_score as rfm_total_score,
+    monetary_score + frequency_score + recency_score as rfm_total_score,
     cast(recency_score as {{ dbt.type_string() }})
         || cast(frequency_score as {{ dbt.type_string() }})
         || cast(monetary_score as {{ dbt.type_string() }}) as rfm_segment_code
