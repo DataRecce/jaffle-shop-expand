@@ -1,34 +1,26 @@
+-- Customer dimension with lifetime order summary
 with
 
 customers as (
-
     select * from {{ ref('stg_customers') }}
-
 ),
 
 orders as (
-
     select * from {{ ref('orders') }}
-
 ),
 
 customer_orders_summary as (
-
     select
         orders.customer_id,
-
-        count(distinct orders.order_id) as count_lifetime_orders,
-        count(distinct orders.order_id) > 1 as is_repeat_buyer,
+        count(distinct orders.order_id) as count_lifetime_orders,  -- total unique orders
+        count(distinct orders.order_id) > 1 as is_repeat_buyer,    -- true if ordered more than once
         min(orders.ordered_at) as first_ordered_at,
         max(orders.ordered_at) as last_ordered_at,
         sum(orders.subtotal) as lifetime_spend_pretax,
         sum(orders.tax_paid) as lifetime_tax_paid,
-        sum(orders.order_total) as lifetime_spend
-
+        sum(orders.order_total) as lifetime_spend  -- includes tax
     from orders
-
     group by 1
-
 ),
 
 joined as (

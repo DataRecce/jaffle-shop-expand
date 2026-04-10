@@ -83,23 +83,24 @@ scored as (
 
 ),
 
+-- Composite store health score and tiering
 final as (
 
     select
         location_id,
         store_name,
-        total_revenue,
         avg_operating_margin_pct,
+        total_revenue,
         avg_labor_cost_pct,
-        revenue_growth_score,
         profitability_score,
-        labor_efficiency_score,
+        revenue_growth_score,
         inventory_health_score,
-        revenue_growth_score + profitability_score + labor_efficiency_score + inventory_health_score as store_health_score,
+        labor_efficiency_score,
+        profitability_score + revenue_growth_score + inventory_health_score + labor_efficiency_score as store_health_score,
         case
-            when revenue_growth_score + profitability_score + labor_efficiency_score + inventory_health_score >= 75 then 'excellent'
-            when revenue_growth_score + profitability_score + labor_efficiency_score + inventory_health_score >= 50 then 'good'
-            when revenue_growth_score + profitability_score + labor_efficiency_score + inventory_health_score >= 25 then 'needs_improvement'
+            when profitability_score + revenue_growth_score + inventory_health_score + labor_efficiency_score >= 80 then 'excellent'
+            when profitability_score + revenue_growth_score + inventory_health_score + labor_efficiency_score >= 60 then 'good'
+            when profitability_score + revenue_growth_score + inventory_health_score + labor_efficiency_score >= 25 then 'needs_improvement'
             else 'critical'
         end as health_tier
 
