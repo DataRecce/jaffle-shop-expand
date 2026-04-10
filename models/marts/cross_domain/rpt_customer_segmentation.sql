@@ -4,11 +4,11 @@ with rfm_data as (
         recency_score,
         frequency_score,
         monetary_score,
-        rfm_total_score,
-        rfm_segment_code,
-        days_since_last_order,
-        order_count,
-        total_spend
+        rfm_composite_score,
+        rfm_category_code,
+        recency_days,
+        purchase_count,
+        lifetime_revenue
     from {{ ref('int_customer_rfm_scores') }}
 ),
 
@@ -18,10 +18,10 @@ segmented as (
         recency_score,
         frequency_score,
         monetary_score,
-        rfm_total_score,
-        days_since_last_order,
-        order_count,
-        total_spend,
+        rfm_composite_score,
+        recency_days,
+        purchase_count,
+        lifetime_revenue,
         case
             when recency_score >= 4 and frequency_score >= 4 and monetary_score >= 4
                 then 'Champion'
@@ -53,14 +53,14 @@ select
         (cast(count(*) as {{ dbt.type_float() }})
         / nullif(sum(count(*)) over (), 0) * 100), 2
     ) as segment_pct,
-    round(cast(avg(total_spend) as numeric), 2) as avg_spend,
-    round(cast(avg(order_count) as numeric), 2) as avg_orders,
-    round(cast(avg(days_since_last_order) as numeric), 0) as avg_days_since_last_order,
-    round(cast(avg(rfm_total_score) as numeric), 2) as avg_rfm_score,
-    sum(total_spend) as total_segment_revenue,
+    round(cast(avg(lifetime_revenue) as numeric), 2) as avg_spend,
+    round(cast(avg(purchase_count) as numeric), 2) as avg_orders,
+    round(cast(avg(recency_days) as numeric), 0) as avg_days_since_last_order,
+    round(cast(avg(rfm_composite_score) as numeric), 2) as avg_rfm_score,
+    sum(lifetime_revenue) as total_segment_revenue,
     round(
-        (cast(sum(total_spend) as {{ dbt.type_float() }})
-        / nullif(sum(sum(total_spend)) over (), 0) * 100), 2
+        (cast(sum(lifetime_revenue) as {{ dbt.type_float() }})
+        / nullif(sum(sum(lifetime_revenue)) over (), 0) * 100), 2
     ) as segment_revenue_share_pct
 from segmented
 group by customer_segment
