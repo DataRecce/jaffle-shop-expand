@@ -17,21 +17,21 @@ order_items_summary as (
     select
         order_id,
 
-        sum(supply_cost) as order_cost,
-        sum(product_price) as order_items_subtotal,
-        count(order_item_id) as count_order_items,
+        sum(supply_cost) as cost_of_goods,
+        sum(product_price) as items_subtotal,
+        count(order_item_id) as item_count,
         sum(
             case
                 when is_food_item then 1
                 else 0
             end
-        ) as count_food_items,
+        ) as food_item_count,
         sum(
             case
                 when is_drink_item then 1
                 else 0
             end
-        ) as count_drink_items
+        ) as drink_item_count
 
     from order_items
 
@@ -44,13 +44,14 @@ compute_booleans as (
     select
         orders.*,
 
-        order_items_summary.order_cost,
-        order_items_summary.order_items_subtotal,
-        order_items_summary.count_food_items,
-        order_items_summary.count_drink_items,
-        order_items_summary.count_order_items,
-        order_items_summary.count_food_items > 0 as is_food_order,
-        order_items_summary.count_drink_items > 0 as is_drink_order
+        order_items_summary.cost_of_goods,
+        order_items_summary.items_subtotal,
+        order_items_summary.food_item_count,
+        order_items_summary.drink_item_count,
+        order_items_summary.item_count,
+        order_items_summary.food_item_count > 0 as has_food_items,
+        order_items_summary.drink_item_count > 0 as has_drink_items,
+        order_items_summary.items_subtotal > 50 as is_high_value_order
 
     from orders
 
@@ -67,8 +68,8 @@ customer_order_count as (
 
         row_number() over (
             partition by customer_id
-            order by ordered_at asc
-        ) as customer_order_number
+            order by ordered_at desc
+        ) as customer_order_sequence
 
     from compute_booleans
 

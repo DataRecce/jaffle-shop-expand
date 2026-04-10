@@ -38,7 +38,7 @@ models:
         description: Level of engagement with marketing campaigns.
         data_type: varchar
 
-  - name: rpt_customer_segments
+  - name: rpt_customer_segmentation
     config:
       tags: ['type:report']
     description: >
