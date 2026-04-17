@@ -1,5 +1,5 @@
 default:
-  target: duckdb
+  target: snowflake-current
   outputs:
     duckdb:
       type: duckdb
