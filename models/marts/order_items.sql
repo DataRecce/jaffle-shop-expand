@@ -43,23 +43,23 @@ joined as (
     select
         order_items.*,
 
-        orders.ordered_at,
-
         products.product_name,
         products.product_price,
         products.is_food_item,
         products.is_drink_item,
 
+        orders.ordered_at,
+
         order_supplies_summary.supply_cost
 
     from order_items
 
-    left join orders on order_items.order_id = orders.order_id
+    left join products on products.product_id = order_items.product_id
 
-    left join products on order_items.product_id = products.product_id
+    left join orders on orders.order_id = order_items.order_id
 
     left join order_supplies_summary
-        on order_items.product_id = order_supplies_summary.product_id
+        on order_supplies_summary.product_id = order_items.product_id
 
 )
 
