@@ -39,14 +39,14 @@ conditional_aggs as (
         sum(order_total) as total_revenue,
 
         -- Order type breakdown using FILTER
-        count(case when is_food_order then 1 end) as food_orders,
-        count(case when is_drink_order then 1 end) as drink_orders,
-        count(case when is_food_order and is_drink_order then 1 end) as combo_orders,
-        count(case when not is_food_order and not is_drink_order then 1 end) as other_orders,
+        count(case when has_food_items then 1 end) as food_orders,
+        count(case when has_drink_items then 1 end) as drink_orders,
+        count(case when has_food_items and has_drink_items then 1 end) as combo_orders,
+        count(case when not has_food_items and not has_drink_items then 1 end) as other_orders,
 
         -- Revenue by customer segment using FILTER
-        sum(case when customer_order_number = 1 then order_total end) as first_order_revenue,
-        sum(case when customer_order_number > 1 then order_total end) as repeat_order_revenue,
+        sum(case when customer_order_sequence = 1 then order_total end) as first_order_revenue,
+        sum(case when customer_order_sequence > 1 then order_total end) as repeat_order_revenue,
 
         -- Average order value by segment using FILTER
         avg(case when is_repeat_buyer then order_total end) as repeat_customer_aov,
@@ -57,8 +57,8 @@ conditional_aggs as (
         avg(case when order_total > 20 then order_total end) as large_order_avg,
 
         -- Item count analysis using FILTER
-        avg(case when is_food_order then count_order_items end) as avg_items_food_orders,
-        avg(case when is_drink_order then count_order_items end) as avg_items_drink_orders
+        avg(case when has_food_items then item_count end) as avg_items_food_orders,
+        avg(case when has_drink_items then item_count end) as avg_items_drink_orders
 
     from order_enriched
     group by 1

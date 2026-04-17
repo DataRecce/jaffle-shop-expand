@@ -56,15 +56,15 @@ multi_filter_summary as (
 
         -- Cross-domain: high-value repeat customers ordering combos on weekends
         count(case when is_repeat_buyer
-              and is_food_order
-              and is_drink_order
+              and has_food_items
+              and has_drink_items
               and day_of_week in (0, 6) then 1 end) as weekend_combo_repeat_orders,
 
         -- Revenue from first-time customers who ordered food
-        sum(case when customer_order_number = 1 and is_food_order then order_total end) as first_time_food_revenue,
+        sum(case when customer_order_sequence = 1 and has_food_items then order_total end) as first_time_food_revenue,
 
         -- Average basket size for returning drink-only orders
-        avg(case when is_drink_order and not is_food_order and customer_order_number > 1 then count_order_items end) as avg_items_repeat_drink_only
+        avg(case when has_drink_items and not has_food_items and customer_order_sequence > 1 then item_count end) as avg_items_repeat_drink_only
 
     from order_enriched
     group by 1

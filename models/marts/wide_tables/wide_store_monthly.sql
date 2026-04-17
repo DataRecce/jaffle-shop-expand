@@ -93,8 +93,8 @@ customer_segments as (
         o.location_id,
         {{ dbt.date_trunc('month', 'o.ordered_at') }} as order_month,
         count(distinct o.customer_id) as unique_customers,
-        count(distinct case when o.customer_order_number = 1 then o.customer_id end) as new_customers,
-        count(distinct case when o.customer_order_number > 1 then o.customer_id end) as returning_customers
+        count(distinct case when o.customer_order_sequence = 1 then o.customer_id end) as new_customers,
+        count(distinct case when o.customer_order_sequence > 1 then o.customer_id end) as returning_customers
 
     from orders_base as o
     group by 1, 2

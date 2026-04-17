@@ -86,7 +86,7 @@ customer_order_seq as (
         ordered_at,
         row_number() over (
             partition by customer_id order by ordered_at
-        ) as customer_order_number,
+        ) as customer_order_sequence,
         lag(ordered_at) over (
             partition by customer_id order by ordered_at
         ) as previous_order_at
@@ -118,12 +118,12 @@ select
     o.order_total,
     o.order_cost,
     o.order_items_subtotal,
-    o.count_order_items,
-    o.count_food_items,
-    o.count_drink_items,
-    o.is_food_order,
-    o.is_drink_order,
-    o.customer_order_number,
+    o.item_count,
+    o.food_item_count,
+    o.drink_item_count,
+    o.has_food_items,
+    o.has_drink_items,
+    o.customer_order_sequence,
 
     -- Order-level computed fields
     oic.item_count,
@@ -191,7 +191,7 @@ select
     loy.is_active_member as is_loyalty_active,
 
     -- Customer order sequence context
-    cos.customer_order_number as customer_order_seq_number,
+    cos.customer_order_sequence as customer_order_seq_number,
     cos.previous_order_at,
     {{ dbt.datediff("cos.previous_order_at", "o.ordered_at", "day") }} as days_since_previous_order,
 
