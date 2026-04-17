@@ -11,7 +11,7 @@ exposures:
       - ref('exec_company_kpis_monthly')
       - ref('rpt_store_pnl')
       - ref('met_weekly_revenue_by_store')
-      - ref('rpt_customer_segments')
+      - ref('rpt_customer_segmentation')
     owner:
       name: Finance Team
       email: finance@jaffleshop.com
