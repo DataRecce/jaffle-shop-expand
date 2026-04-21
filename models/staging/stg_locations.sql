@@ -10,20 +10,20 @@ renamed as (
 
     select
 
-        ----------  ids
+        -- primary key: location identifier
         cast(id as varchar) as location_id,
 
-        ---------- text
+        -- display name for the location
         name as location_name,
 
-        ---------- numerics
+        -- tax rate applied at this location (percentage)
         tax_rate,
 
-        ---------- timestamps
+        -- opening date, truncated to day granularity
         {{ dbt.date_trunc('day', 'opened_at') }} as opened_date
 
     from source
 
 )
 
-select * from renamed
+SELECT * FROM renamed
