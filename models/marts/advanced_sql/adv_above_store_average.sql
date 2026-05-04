@@ -26,9 +26,9 @@ above_average_orders as (
         l.location_name,
         o.ordered_at,
         o.order_total,
-        o.count_order_items,
-        o.is_food_order,
-        o.is_drink_order,
+        o.item_count,
+        o.has_food_items,
+        o.has_drink_items,
 
         -- Also fetch the store average for display
         (
@@ -57,9 +57,9 @@ select
     location_name,
     ordered_at,
     order_total,
-    count_order_items,
-    is_food_order,
-    is_drink_order,
+    item_count,
+    has_food_items,
+    has_drink_items,
     round(store_avg_order_total, 2) as store_avg_order_total,
     round(order_total - store_avg_order_total, 2) as amount_above_average,
     round(((order_total / nullif(store_avg_order_total, 0)) - 1) * 100, 1) as pct_above_average

@@ -28,9 +28,9 @@ ranked_orders as (
         o.order_id,
         o.ordered_at,
         o.order_total,
-        o.count_order_items,
-        o.is_food_order,
-        o.is_drink_order,
+        o.item_count,
+        o.has_food_items,
+        o.has_drink_items,
         o.location_id,
         row_number() over (partition by o.customer_id order by o.ordered_at desc) as recency_rank
     from orders as o
@@ -45,9 +45,9 @@ latest_orders as (
         ro.order_id,
         ro.ordered_at,
         ro.order_total,
-        ro.count_order_items,
-        ro.is_food_order,
-        ro.is_drink_order,
+        ro.item_count,
+        ro.has_food_items,
+        ro.has_drink_items,
         ro.location_id,
         l.location_name,
         ro.recency_rank

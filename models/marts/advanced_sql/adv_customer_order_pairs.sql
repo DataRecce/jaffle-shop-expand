@@ -52,8 +52,8 @@ order_pairs as (
         o.location_id,
         o.ordered_at,
         o.order_total,
-        o.count_order_items,
-        o.customer_order_number,
+        o.item_count,
+        o.customer_order_sequence,
         ops.product_ids,
 
         -- Previous order fields via LAG
@@ -77,10 +77,10 @@ order_pairs as (
             order by o.ordered_at, o.order_id
         ) as prev_order_total,
 
-        lag(o.count_order_items) over (
+        lag(o.item_count) over (
             partition by o.customer_id
             order by o.ordered_at, o.order_id
-        ) as prev_count_order_items
+        ) as prev_item_count
 
     from orders as o
     left join order_product_sets as ops
@@ -106,16 +106,16 @@ final as (
     select
         order_id,
         customer_id,
-        customer_order_number,
+        customer_order_sequence,
         ordered_at,
         order_total,
-        count_order_items,
+        item_count,
         location_id,
 
         prev_order_id,
         prev_ordered_at,
         prev_order_total,
-        prev_count_order_items,
+        prev_item_count,
         prev_location_id,
 
         -- Days between consecutive orders

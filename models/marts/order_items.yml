@@ -85,6 +85,10 @@ semantic_models:
         description: The median revenue generated for each order item.
         agg: median
         expr: product_price
+      - name: order_cost
+        description: The cost of supplies for each order item.
+        agg: sum
+        expr: supply_cost
 
 metrics:
   # Simple metrics

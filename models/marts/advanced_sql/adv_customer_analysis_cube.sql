@@ -25,9 +25,9 @@ order_enriched as (
         o.location_id,
         extract(year from o.ordered_at) as order_year,
         o.order_total,
-        o.is_food_order,
-        o.is_drink_order,
-        o.count_order_items
+        o.has_food_items,
+        o.has_drink_items,
+        o.item_count
     from orders as o
     inner join customers as c
         on o.customer_id = c.customer_id
@@ -45,7 +45,7 @@ customer_cube as (
         count(distinct customer_id) as unique_customers,
         sum(order_total) as total_revenue,
         avg(order_total) as avg_order_value,
-        sum(count_order_items) as total_items_sold,
+        sum(item_count) as total_items_sold,
 
         -- Identify which dimensions are aggregated
         grouping(customer_type) as is_type_aggregated,

@@ -21,7 +21,7 @@ customer_order_sequence as (
         customer_id,
         order_id,
         ordered_at,
-        customer_order_number
+        customer_order_sequence
     from orders
 
 ),
@@ -32,7 +32,7 @@ first_order as (
         customer_id,
         ordered_at as first_order_at
     from customer_order_sequence
-    where customer_order_number = 1
+    where customer_order_sequence = 1
 
 ),
 
@@ -42,7 +42,7 @@ second_order as (
         customer_id,
         ordered_at as second_order_at
     from customer_order_sequence
-    where customer_order_number = 2
+    where customer_order_sequence = 2
 
 ),
 
@@ -52,7 +52,7 @@ third_order as (
         customer_id,
         ordered_at as third_order_at
     from customer_order_sequence
-    where customer_order_number = 3
+    where customer_order_sequence = 3
 
 ),
 

@@ -20,8 +20,8 @@ order_enriched as (
         o.ordered_at,
         o.order_total,
         o.subtotal,
-        o.count_order_items,
-        o.customer_order_number,
+        o.item_count,
+        o.customer_order_sequence,
         c.customer_type,
         {{ dbt.date_trunc('month', 'o.ordered_at') }} as order_month
     from orders as o
@@ -39,7 +39,7 @@ segment_metrics as (
         count(distinct customer_id) as unique_customers,
         sum(order_total) as total_revenue,
         avg(order_total) as avg_order_value,
-        avg(count_order_items) as avg_items_per_order,
+        avg(item_count) as avg_items_per_order,
         sum(order_total) / nullif(count(distinct customer_id), 0) as revenue_per_customer
     from order_enriched
     group by 1, 2
