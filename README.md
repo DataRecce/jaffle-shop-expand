@@ -238,6 +238,19 @@ Pre-built base artifacts (`manifest.json`, `catalog.json`) are included in `targ
 
 The answer key is available for validation.
 
+## Lineage Change-Category Fixture
+
+The `feature/drc-3552-change-category-visual-fixtures` branch is a visual-regression fixture for Recce Cloud's lineage graph. Comparing that branch with `main` produces one modified node in each change category:
+
+| Expected category | Node | Fixture change |
+|-------------------|------|----------------|
+| `breaking` | `narrow_active_employees` | Adds a row-level predicate |
+| `partial_breaking` | `narrow_order_date_range` | Renames an output column |
+| `non_breaking` | `narrow_avg_order_value` | Adds an output column |
+| `unknown` | `weekly_business_review` | Modifies an exposure, exercising the non-SQL classification path |
+
+Build `main` into the base target and the fixture branch into the current target before starting Recce. In `/info`, each node above should have the expected `change.category`; the same four categories should be present in `/cll` when change analysis is enabled.
+
 ## Project Structure
 
 ```

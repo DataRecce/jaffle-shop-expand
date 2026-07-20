@@ -6,7 +6,7 @@ exposures:
     type: dashboard
     maturity: high
     url: https://bi.jaffleshop.com/dashboards/weekly-review
-    description: Executive weekly business review dashboard showing KPIs, revenue trends, and store performance
+    description: Executive weekly business review dashboard showing KPIs, revenue trends, store performance, and category health
     depends_on:
       - ref('exec_company_kpis_monthly')
       - ref('rpt_store_pnl')
